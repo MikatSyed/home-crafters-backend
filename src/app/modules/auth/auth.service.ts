@@ -6,6 +6,7 @@ import config from '../../../config';
 import ApiError from '../../../errors/ApiError';
 import { jwtHelpers } from '../../../helpers/jwtHelpers';
 import prisma from '../../../shared/prisma';
+import cloudinary from 'cloudinary';
 import {
   ILoginUser,
   ILoginUserResponse,
@@ -13,7 +14,33 @@ import {
 } from './auth.interface';
 
 const Signup = async (data: User): Promise<Partial<User>> => {
-  const { name, email, password, role, contactNo, address, profileImg } = data;
+  const { name, email, password, role, contactNo, address } = data;
+  let { profileImg } = data;
+  let images: any = [];
+
+  if (typeof profileImg === 'string') {
+    images.push(profileImg);
+  } else {
+    images = profileImg;
+  }
+  if (!profileImg) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Please Select Image');
+  }
+
+  const imagesLinks = [];
+
+  for (let i = 0; i < images.length; i++) {
+    const result = await cloudinary.v2.uploader.upload(images[i], {
+      folder: 'auth',
+    });
+
+    imagesLinks.push({
+      public_id: result.public_id,
+      url: result.secure_url,
+    });
+  }
+  profileImg = imagesLinks.map(image => image.url);
+
   const hashedPassword = await bcrypt.hash(
     password,
     Number(config.bycrypt_salt_rounds)
@@ -27,6 +54,7 @@ const Signup = async (data: User): Promise<Partial<User>> => {
       contactNo,
       address,
       profileImg,
+      createdAt: new Date(),
     },
   });
 

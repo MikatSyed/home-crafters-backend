@@ -19,9 +19,6 @@ const signupZodSchema = z.object({
     contactNo: z.string({
       required_error: 'ContactNo is required',
     }),
-    profileImg: z.string({
-      required_error: 'ProfileImg is required',
-    }),
   }),
 });
 

@@ -1,3 +1,4 @@
+import { v2 as cloudinary } from 'cloudinary';
 import { Server } from 'http';
 import app from './app';
 import config from './config';
@@ -15,6 +16,12 @@ async function databaseConnection() {
     }
     process.exit(1);
   };
+
+  cloudinary.config({
+    cloud_name: config.cloud_name,
+    api_key: config.api_key,
+    api_secret: config.api_secret,
+  });
 
   const unexpectedErrorHandler = (error: unknown) => {
     console.log(error);
