@@ -6,26 +6,24 @@ const createServiceZodSchema = z.object({
       required_error: 'Name is required',
     }),
     description: z.string({
-      required_error: 'description is required',
+      required_error: 'Description is required',
     }),
     location: z.string({
-      required_error: 'location is required',
+      required_error: 'Location is required',
     }),
     price: z
       .number({
-        required_error: 'price is required',
+        required_error: 'Price is required',
       })
       .nonnegative(),
-
-    image: z.string({
-      required_error: 'image is required',
+    serviceImg: z.string({
+      required_error: 'Image URL is required',
     }),
     duration: z.string({
-      required_error: 'duration is required',
+      required_error: 'Duration is required',
     }),
-
     categoryId: z.string({
-      required_error: 'categoryId is required',
+      required_error: 'Category ID is required',
     }),
   }),
 });

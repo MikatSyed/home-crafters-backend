@@ -19,6 +19,7 @@ const getAllFromDB = async (): Promise<Partial<IResponseUser[]>> => {
       contactNo: true,
       address: true,
       profileImg: true,
+      createdAt: true,
     },
   });
   return result;
@@ -37,6 +38,7 @@ const getByIdFromDB = async (id: string): Promise<IResponseUser | null> => {
       contactNo: true,
       address: true,
       profileImg: true,
+      createdAt: true,
     },
   });
   if (!result) {
@@ -81,6 +83,7 @@ const updateOneInDB = async (
       contactNo: true,
       address: true,
       profileImg: true,
+      createdAt: true,
     },
   });
   return result;

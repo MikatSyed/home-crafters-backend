@@ -1,5 +1,5 @@
 // @typescript-eslint/no-explicit-any
-import { Service } from '@prisma/client';
+import { Availbility, Service } from '@prisma/client';
 import httpStatus from 'http-status';
 import ApiError from '../../../errors/ApiError';
 import { queryHelpers } from '../../../helpers/queryHelpers';
@@ -12,10 +12,67 @@ import {
   ServiceSearchableFields,
 } from './service.constant';
 import { IServiceFilters } from './service.interface';
+import cloudinary from 'cloudinary';
 
 const insertIntoDB = async (data: Service): Promise<Service> => {
+  const {
+    price,
+    categoryId,
+    duration,
+    description,
+    location,
+    availbility,
+    name,
+  } = data;
+  let { serviceImg } = data;
+
+  const isNameExist = await prisma.user.findFirst({
+    where: {
+      name,
+    },
+  });
+
+  if (isNameExist) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Name already exits');
+  }
+
+  if (serviceImg) {
+    let images: any = [];
+    if (typeof serviceImg === 'string') {
+      images.push(serviceImg);
+    } else {
+      images = serviceImg;
+    }
+    if (!serviceImg) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Please Select Image');
+    }
+
+    const imagesLinks = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const result = await cloudinary.v2.uploader.upload(images[i], {
+        folder: 'services',
+      });
+
+      imagesLinks.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+    serviceImg = imagesLinks.map(image => image.url);
+  }
+
   const result = await prisma.service.create({
-    data,
+    data: {
+      name,
+      price,
+      categoryId,
+      duration,
+      description,
+      location,
+      serviceImg,
+      availbility,
+    },
     include: {
       category: true,
     },
@@ -29,7 +86,16 @@ const getAllFromDB = async (
 ): Promise<IGenericResponse<Service[]>> => {
   const { limit, page, skip } = queryHelpers.calculatePagination(options);
   const { searchTerm, minPrice, maxPrice, ...filterData } = filters;
-  console.log(searchTerm);
+  let newMinPrice;
+  let newMaxPrice;
+  if (typeof minPrice === 'string') {
+    newMinPrice = parseInt(minPrice);
+  }
+
+  if (typeof maxPrice === 'string') {
+    newMaxPrice = parseInt(maxPrice);
+  }
+
   const andConditions = [];
 
   if (searchTerm) {
@@ -53,23 +119,23 @@ const getAllFromDB = async (
     });
   }
 
-  if (typeof minPrice === 'number' && typeof maxPrice === 'number') {
+  if (newMinPrice && newMaxPrice) {
     andConditions.push({
       price: {
-        gte: minPrice,
-        lte: maxPrice,
+        gte: newMinPrice,
+        lte: newMaxPrice,
       },
     });
-  } else if (typeof minPrice === 'number') {
+  } else if (newMinPrice) {
     andConditions.push({
       price: {
-        gte: minPrice,
+        gte: newMinPrice,
       },
     });
-  } else if (typeof maxPrice === 'number') {
+  } else if (newMaxPrice) {
     andConditions.push({
       price: {
-        lte: maxPrice,
+        lte: newMaxPrice,
       },
     });
   }
@@ -116,13 +182,28 @@ const getAllFromDB = async (
     where: whereConditions,
   });
 
+  const servicesWithStatistics = result.map(service => {
+    const reviews = service.reviews;
+    const totalReviews = reviews.length;
+    const averageRating =
+      totalReviews > 0
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+        : 0;
+
+    return {
+      ...service,
+      totalReviews,
+      averageRating,
+    };
+  });
+
   return {
     meta: {
       total,
       page,
       limit,
     },
-    data: result,
+    data: servicesWithStatistics,
   };
 };
 
@@ -144,6 +225,7 @@ const getByIdFromDB = async (id: string): Promise<Service | null> => {
     include: {
       category: true,
       reviews: true,
+      bookings: true,
     },
   });
   return result;
@@ -159,8 +241,21 @@ const updateOneInDB = async (
     },
   });
 
+  console.log(isserviceExist);
+
   if (!isserviceExist) {
     throw new ApiError(httpStatus.NOT_FOUND, 'service does not exist');
+  }
+
+  if (
+    payload.availbility &&
+    isserviceExist.availbility === Availbility.available &&
+    payload.availbility === Availbility.upcoming
+  ) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'can only change from upcoming to available'
+    );
   }
 
   const result = await prisma.service.update({

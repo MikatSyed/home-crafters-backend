@@ -34,7 +34,7 @@ const loginUser: RequestHandler = catchAsync(async (req, res) => {
   res.send({
     statusCode: 200,
     success: true,
-    message: 'User signin successfully!',
+    message: 'Login Successfully!',
     token,
   });
 });

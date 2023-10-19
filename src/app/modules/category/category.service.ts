@@ -2,15 +2,30 @@ import { Category } from '@prisma/client';
 import httpStatus from 'http-status';
 import ApiError from '../../../errors/ApiError';
 import prisma from '../../../shared/prisma';
+import { IPaginationOptions } from '../../../interfaces/pagination';
+import { queryHelpers } from '../../../helpers/queryHelpers';
+import { IGenericResponse } from '../../../interfaces/common';
 
 const insertIntoDB = async (data: Category): Promise<Category> => {
   const result = await prisma.category.create({ data });
   return result;
 };
 
-const getAllFromDB = async (): Promise<Category[]> => {
+const getAllFromDB = async (
+  options: IPaginationOptions
+): Promise<IGenericResponse<Category[]>> => {
+  const { limit, page } = queryHelpers.calculatePagination(options);
   const result = await prisma.category.findMany({});
-  return result;
+  const total = await prisma.category.count();
+
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+    },
+    data: result,
+  };
 };
 
 const getByIdFromDB = async (id: string): Promise<Category | null> => {

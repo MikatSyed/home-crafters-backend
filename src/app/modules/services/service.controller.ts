@@ -12,14 +12,18 @@ const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Book created successfully',
+    message: 'Service created successfully',
     data: result,
   });
 });
 
 const getAllFromDB: RequestHandler = catchAsync(async (req, res) => {
   const filters = pick(req.query, ServiceFilterableFields);
+  console.log({ filters });
+
   const queryOptions = pick(req.query, queryFields);
+  console.log(queryOptions);
+
   const result = await ServiceServices.getAllFromDB(filters, queryOptions);
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -30,23 +34,6 @@ const getAllFromDB: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
-// const getByCategoryIdFromDB: RequestHandler = catchAsync(async (req, res) => {
-//   const { categoryId } = req.params;
-//   const queryOptions = pick(req.query, queryFields);
-//   const result = await ServiceServices.getByCategoryIdFromDB(
-//     categoryId,
-//     queryOptions
-//   );
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Books with associated category data fetched successfully',
-//     meta: result.meta,
-//     data: result.data,
-//   });
-// });
-
 const getByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await ServiceServices.getByIdFromDB(id);
@@ -54,7 +41,7 @@ const getByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Book fetched successfully',
+    message: 'Service fetched successfully',
     data: result,
   });
 });
@@ -65,7 +52,7 @@ const updateOneInDB: RequestHandler = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Book updated successfully',
+    message: 'Service updated successfully',
     data: result,
   });
 });
@@ -77,7 +64,7 @@ const deleteByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Book deleted successfully',
+    message: 'Service deleted successfully',
     data: result,
   });
 });

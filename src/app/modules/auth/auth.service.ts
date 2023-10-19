@@ -15,6 +15,17 @@ import {
 
 const Signup = async (data: User): Promise<Partial<User>> => {
   const { name, email, password, role, contactNo, address } = data;
+
+  const isEmailExist = await prisma.user.findFirst({
+    where: {
+      email,
+    },
+  });
+
+  if (isEmailExist) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already exits');
+  }
+
   let { profileImg } = data;
   let images: any = [];
 
@@ -78,7 +89,10 @@ const LoginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
     isUserExist.password &&
     !(await bcrypt.compare(password, isUserExist.password))
   ) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password is incorrect');
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      'Email or Password is incorrect'
+    );
   }
 
   //create access token & refresh token

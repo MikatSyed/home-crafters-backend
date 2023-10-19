@@ -7,5 +7,6 @@ export type IResponseUser = {
   role: Role;
   contactNo: string;
   address: string;
-  profileImg: string | null;
+  profileImg: string[]; // Update this to match the database model
+  createdAt: Date;
 };
