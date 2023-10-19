@@ -15,6 +15,7 @@ const profile_route_1 = require("../modules/profile/profile.route");
 const timeSlots_routes_1 = require("../modules/timeSlots/timeSlots.routes");
 const booking_route_1 = require("../modules/booking/booking.route");
 const feedback_route_1 = require("../modules/feedback/feedback.route");
+const payment_route_1 = require("../modules/payment/payment.route");
 const router = express_1.default.Router();
 const moduleRoutes = [
     {
@@ -60,6 +61,10 @@ const moduleRoutes = [
     {
         path: '/feedback',
         route: feedback_route_1.FeedbackRoutes,
+    },
+    {
+        path: '/payment',
+        route: payment_route_1.PaymentRoutes,
     },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));

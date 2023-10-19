@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 // import { Payment } from "@prisma/client";
 // import prisma from "../../shared/prisma";
 // const createPayment = async (payment: Payment): Promise<Payment> => {

@@ -98,20 +98,56 @@ const updateOneInDB = (id, payload) => __awaiter(void 0, void 0, void 0, functio
     });
     return result;
 });
+// const deleteByIdFromDB = async (id: string): Promise<Booking> => {
+//   const isBookingExist = await prisma.booking.findFirst({
+//     where: {
+//       id,
+//     },
+//   });
+//   if (!isBookingExist) {
+//     throw new ApiError(httpStatus.NOT_FOUND, 'Booking does not exist');
+//   }
+//   const data = await prisma.booking.delete({
+//     where: {
+//       id,
+//     },
+//   });
+//   return data;
+// };
 const deleteByIdFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const isBookingExist = yield prisma_1.default.booking.findFirst({
         where: {
             id,
         },
     });
-    if (!isBookingExist) {
-        throw new ApiError_1.default(http_status_1.default.NOT_FOUND, 'Booking does not exist');
-    }
-    const data = yield prisma_1.default.booking.delete({
-        where: {
-            id,
-        },
-    });
+    const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
+        yield transactionClient.payment.deleteMany({
+            where: {
+                bookingId: isBookingExist === null || isBookingExist === void 0 ? void 0 : isBookingExist.id,
+            },
+        });
+        const data = yield transactionClient.booking.delete({
+            where: {
+                id,
+            },
+            include: {
+                payments: true,
+            },
+        });
+        return data;
+    }));
+    return result;
+});
+const getStatistics = () => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('hitted');
+    const totalUsers = yield prisma_1.default.user.count();
+    const totalBookings = yield prisma_1.default.booking.count();
+    const totalServices = yield prisma_1.default.service.count();
+    const data = {
+        totalBookings,
+        totalServices,
+        totalUsers,
+    };
     return data;
 });
 exports.BookingService = {
@@ -121,4 +157,5 @@ exports.BookingService = {
     updateOneInDB,
     deleteByIdFromDB,
     fetchBookingsForDate,
+    getStatistics,
 };

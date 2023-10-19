@@ -75,6 +75,15 @@ const deleteByIdFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         data: result,
     });
 }));
+const getStatistics = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield booking_service_1.BookingService.getStatistics();
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Statistic fetched successfully',
+        data: result,
+    });
+}));
 exports.BookingController = {
     insertIntoDB,
     getAllFromDB,
@@ -82,4 +91,5 @@ exports.BookingController = {
     updateOneInDB,
     deleteByIdFromDB,
     fetchBookingsForDate,
+    getStatistics,
 };

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 // import { NextFunction, Request, Response } from "express";
 // import { paymentServices } from "./payments.services";
 // const createPayment = async (req: Request, res: Response, next: NextFunction) => {
