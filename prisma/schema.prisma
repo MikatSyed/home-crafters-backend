@@ -28,27 +28,7 @@ model User {
   @@map("users")
 }
 
-// model AvailableService {
-//   id              String   @id @default(uuid())
-//   slotDate        DateTime @map("slot_date")
-//   availableSeats  Int      @map("available_seats")
-//   availableStatus Boolean      @map("available_status")
-//   isBooked        Boolean  @default(false) @map("is_booked")
-//   price           String
-//   createdAt       DateTime @default(now()) @map("created_at")
-//   updatedAt       DateTime @updatedAt @map("updated_at")
-//   bookings   Booking[]
 
-//   serviceId String  @map("service_id")
-//   service   Service @relation(fields: [serviceId], references: [id])
-
-//   slotId String    @map("slot_id")
-//   slot   TimeSlots @relation(fields: [slotId], references: [id])
-
-  
-//   @@unique([slotId, serviceId, slotDate])
-//   @@map("available_services")
-// }
 
 model Service {
   id          String   @id @default(uuid())
@@ -79,6 +59,7 @@ model Booking {
   userId String    @map("patient_id")
   serviceId String @map("service_id")
   slotId String    @map("slot_id")
+  isPaid     Boolean @default(false)
   user   User      @relation(fields: [userId], references: [id])
   service  Service @relation(fields: [serviceId], references: [id])
   slot   TimeSlots @relation(fields: [slotId], references: [id])
@@ -106,8 +87,6 @@ model Category {
 model Payment {
   id            String   @id @default(uuid())
   amount        String
-  paymentDate   DateTime @default(now()) @map("payment_date")
-  paymentStatus String   @map("payment_status")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
   bookingId String      @unique @map("booking_id")

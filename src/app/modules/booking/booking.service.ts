@@ -102,6 +102,25 @@ const updateOneInDB = async (
   return result;
 };
 
+// const deleteByIdFromDB = async (id: string): Promise<Booking> => {
+//   const isBookingExist = await prisma.booking.findFirst({
+//     where: {
+//       id,
+//     },
+//   });
+
+//   if (!isBookingExist) {
+//     throw new ApiError(httpStatus.NOT_FOUND, 'Booking does not exist');
+//   }
+
+//   const data = await prisma.booking.delete({
+//     where: {
+//       id,
+//     },
+//   });
+//   return data;
+// };
+
 const deleteByIdFromDB = async (id: string): Promise<Booking> => {
   const isBookingExist = await prisma.booking.findFirst({
     where: {
@@ -109,15 +128,37 @@ const deleteByIdFromDB = async (id: string): Promise<Booking> => {
     },
   });
 
-  if (!isBookingExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Booking does not exist');
-  }
+  const result = await prisma.$transaction(async transactionClient => {
+    await transactionClient.payment.deleteMany({
+      where: {
+        bookingId: isBookingExist?.id,
+      },
+    });
 
-  const data = await prisma.booking.delete({
-    where: {
-      id,
-    },
+    const data = await transactionClient.booking.delete({
+      where: {
+        id,
+      },
+      include: {
+        payments: true,
+      },
+    });
+    return data;
   });
+  return result;
+};
+
+const getStatistics = async () => {
+  console.log('hitted');
+  const totalUsers = await prisma.user.count();
+  const totalBookings = await prisma.booking.count();
+  const totalServices = await prisma.service.count();
+
+  const data = {
+    totalBookings,
+    totalServices,
+    totalUsers,
+  };
   return data;
 };
 
@@ -128,4 +169,5 @@ export const BookingService = {
   updateOneInDB,
   deleteByIdFromDB,
   fetchBookingsForDate,
+  getStatistics,
 };

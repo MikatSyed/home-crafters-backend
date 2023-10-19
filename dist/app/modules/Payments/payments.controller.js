@@ -1,6 +1,6 @@
+"use strict";
 // import { NextFunction, Request, Response } from "express";
 // import { paymentServices } from "./payments.services";
-
 // const createPayment = async (req: Request, res: Response, next: NextFunction) => {
 //     try {
 //         const { ...paymentData } = req.body;
@@ -14,7 +14,6 @@
 //         next(error)
 //     }
 // };
-
 // const getAllPayments = async (req: Request, res: Response, next: NextFunction) => {
 //     try {
 //         const payments = await paymentServices.getAllPayments();
@@ -27,7 +26,6 @@
 //         next(error)
 //     }
 // };
-
 // const getSinglePayment = async (req: Request, res: Response, next: NextFunction) => {
 //     try {
 //         const { id } = req.params;
@@ -41,7 +39,6 @@
 //         next(error)
 //     }
 // };
-
 // const updatePayment = async (req: Request, res: Response, next: NextFunction) => {
 //     try {
 //         const { id } = req.params;
@@ -56,7 +53,6 @@
 //         next(error)
 //     }
 // };
-
 // const deletePayment = async (req: Request, res: Response, next: NextFunction) => {
 //     try {
 //         const { id } = req.params;
@@ -70,7 +66,6 @@
 //         next(error)
 //     }
 // };
-
 // export const paymentController = {
 //     createPayment,
 //     getAllPayments,

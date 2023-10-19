@@ -10,6 +10,7 @@ import { ProfileRoutes } from '../modules/profile/profile.route';
 import { timeSlotsRoutes } from '../modules/timeSlots/timeSlots.routes';
 import { BookingRoutes } from '../modules/booking/booking.route';
 import { FeedbackRoutes } from '../modules/feedback/feedback.route';
+import { PaymentRoutes } from '../modules/payment/payment.route';
 
 const router = express.Router();
 
@@ -57,6 +58,10 @@ const moduleRoutes = [
   {
     path: '/feedback',
     route: FeedbackRoutes,
+  },
+  {
+    path: '/payment',
+    route: PaymentRoutes,
   },
 ];
 

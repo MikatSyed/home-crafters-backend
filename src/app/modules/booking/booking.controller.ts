@@ -74,6 +74,17 @@ const deleteByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const getStatistics: RequestHandler = catchAsync(async (req, res) => {
+  const result = await BookingService.getStatistics();
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Statistic fetched successfully',
+    data: result,
+  });
+});
+
 export const BookingController = {
   insertIntoDB,
   getAllFromDB,
@@ -81,4 +92,5 @@ export const BookingController = {
   updateOneInDB,
   deleteByIdFromDB,
   fetchBookingsForDate,
+  getStatistics,
 };
