@@ -5,6 +5,9 @@ const createCategoryZodSchema = z.object({
     title: z.string({
       required_error: 'Title is required',
     }),
+    categoryImg: z.string({
+      required_error: 'Image URL is required',
+    }),
   }),
 });
 const updateCategoryZodSchema = z.object({

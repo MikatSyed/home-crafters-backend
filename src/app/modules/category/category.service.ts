@@ -5,9 +5,23 @@ import prisma from '../../../shared/prisma';
 import { IPaginationOptions } from '../../../interfaces/pagination';
 import { queryHelpers } from '../../../helpers/queryHelpers';
 import { IGenericResponse } from '../../../interfaces/common';
+import cloudinary from 'cloudinary';
 
 const insertIntoDB = async (data: Category): Promise<Category> => {
-  const result = await prisma.category.create({ data });
+  const { title } = data;
+  let { categoryImg } = data;
+  const myCloud = await cloudinary.v2.uploader.upload(categoryImg, {
+    folder: 'images',
+    width: 150,
+    crop: 'scale',
+  });
+  categoryImg = myCloud.secure_url;
+  const result = await prisma.category.create({
+    data: {
+      title,
+      categoryImg,
+    },
+  });
   return result;
 };
 
@@ -15,7 +29,11 @@ const getAllFromDB = async (
   options: IPaginationOptions
 ): Promise<IGenericResponse<Category[]>> => {
   const { limit, page } = queryHelpers.calculatePagination(options);
-  const result = await prisma.category.findMany({});
+  const result = await prisma.category.findMany({
+    include: {
+      services: true,
+    },
+  });
   const total = await prisma.category.count();
 
   return {
@@ -72,22 +90,38 @@ const updateOneInDB = async (
 };
 
 const deleteByIdFromDB = async (id: string): Promise<Category> => {
-  const isCategoryExist = await prisma.category.findFirst({
-    where: {
-      id,
-    },
+  const result = await prisma.$transaction(async prismaClient => {
+    const existingCategory = await prismaClient.category.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        services: true, // Include associated services
+      },
+    });
+
+    if (!existingCategory) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Category does not exist');
+    }
+
+    // Delete the associated services
+    await prismaClient.service.deleteMany({
+      where: {
+        categoryId: id,
+      },
+    });
+
+    // Delete the category
+    const deletedCategory = await prismaClient.category.delete({
+      where: {
+        id,
+      },
+    });
+
+    return deletedCategory;
   });
 
-  if (!isCategoryExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Category does not exist');
-  }
-
-  const data = await prisma.category.delete({
-    where: {
-      id,
-    },
-  });
-  return data;
+  return result;
 };
 
 export const CategoryService = {
