@@ -14,7 +14,7 @@ const initPayment = async (payload: any) => {
       success_url: 'https://home-crafter-mikatsyed.vercel.app/payment',
       fail_url: 'http://localhost:3030/fail',
       cancel_url: 'http://localhost:3030/cancel',
-      ipn_url: 'http://localhost:3030/ipn',
+      ipn_url: 'https://home-crafter-mikatsyed.vercel.app/ipn',
       shipping_method: 'N/A',
       product_name: 'Service Payment',
       product_category: 'Payment',
