@@ -74,6 +74,12 @@ const getByIdFromDB = async (id: string): Promise<Booking | null> => {
     where: {
       id,
     },
+    include: {
+      user: true, // Include the User relation
+      service: true, // Include the Service relation
+      slot: true, // Include the TimeSlots relation
+      payments: true, // Include the Payment relation
+    },
   });
   return result;
 };

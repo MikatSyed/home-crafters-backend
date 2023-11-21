@@ -23,6 +23,7 @@ model User {
   updatedAt  DateTime  @updatedAt
   bookings   Booking[]
   reviews    Review[]
+  payments   Payment[]
 
   @@map("users")
 }
@@ -61,7 +62,7 @@ model Booking {
   user        User      @relation(fields: [userId], references: [id])
   service     Service   @relation(fields: [serviceId], references: [id])
   slot        TimeSlots @relation(fields: [slotId], references: [id])
-  payments    Payment?
+  payments    Payment[]
 
   @@unique([slotId, serviceId, bookingDate])
   @@map("bookings")
@@ -79,12 +80,18 @@ model Category {
 }
 
 model Payment {
-  id        String   @id @default(uuid())
-  amount    String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  bookingId String   @unique @map("booking_id")
-  booking   Booking  @relation(fields: [bookingId], references: [id])
+  id                 String        @id @default(uuid())
+  amount             Int
+  userId             String
+  user               User          @relation(fields: [userId], references: [id])
+  bookingId          String
+  booking            Booking       @relation(fields: [bookingId], references: [id])
+  status             PaymentStatus @default(PANDING)
+  transactionId      String
+  paymentGatewayData Json?
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
 
   @@map("payment")
 }
@@ -157,4 +164,9 @@ enum Status {
 enum Availbility {
   upcoming
   available
+}
+
+enum PaymentStatus {
+  PANDING
+  PAID
 }

@@ -5,6 +5,8 @@ import { BookingController } from './booking.controller';
 
 const router = express.Router();
 
+router.get('/check-available-slot', BookingController.fetchBookingsForDate);
+router.get('/:id', BookingController.getByIdFromDB);
 router.get('/statistics', BookingController.getStatistics);
 
 router.post(
@@ -14,8 +16,6 @@ router.post(
 );
 
 router.get('/', BookingController.getAllFromDB);
-router.get('/check-available-slot', BookingController.fetchBookingsForDate);
-router.get('/:id', BookingController.getByIdFromDB);
 
 router.patch(
   '/:id',
