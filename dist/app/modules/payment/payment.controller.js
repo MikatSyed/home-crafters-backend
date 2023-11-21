@@ -1,58 +1,75 @@
-'use strict';
-var __awaiter =
-  (this && this.__awaiter) ||
-  function (thisArg, _arguments, P, generator) {
-    function adopt(value) {
-      return value instanceof P
-        ? value
-        : new P(function (resolve) {
-            resolve(value);
-          });
-    }
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
-      function fulfilled(value) {
-        try {
-          step(generator.next(value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-      function rejected(value) {
-        try {
-          step(generator['throw'](value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-      function step(result) {
-        result.done
-          ? resolve(result.value)
-          : adopt(result.value).then(fulfilled, rejected);
-      }
-      step((generator = generator.apply(thisArg, _arguments || [])).next());
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-  };
-var __importDefault =
-  (this && this.__importDefault) ||
-  function (mod) {
-    return mod && mod.__esModule ? mod : { default: mod };
-  };
-Object.defineProperty(exports, '__esModule', { value: true });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentController = void 0;
-const catchAsync_1 = __importDefault(require('../../../shared/catchAsync'));
-const payment_service_1 = require('./payment.service');
-const sendResponse_1 = __importDefault(require('../../../shared/sendResponse'));
-const postPayment = (0, catchAsync_1.default)((req, res) =>
-  __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield payment_service_1.paymentService.postPayment(req.body);
+const payment_service_1 = require("./payment.service");
+const http_status_1 = __importDefault(require("http-status"));
+const payment_constants_1 = require("./payment.constants");
+const pick_1 = __importDefault(require("../../../shared/pick"));
+const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
+const initPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield payment_service_1.PaymentService.initPayment(req.body);
     (0, sendResponse_1.default)(res, {
-      statusCode: 200,
-      success: true,
-      message: 'Payment created successfully',
-      data: result,
+        success: true,
+        statusCode: http_status_1.default.OK,
+        message: 'Payment init successfully',
+        data: result,
     });
-  })
-);
+});
+const webhook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield payment_service_1.PaymentService.webhook(req.query);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_1.default.OK,
+        message: 'Payment verified!',
+        data: result,
+    });
+});
+const getAllFromDB = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const filters = (0, pick_1.default)(req.query, payment_constants_1.paymentFilterableFields);
+        const options = (0, pick_1.default)(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+        const result = yield payment_service_1.PaymentService.getAllFromDB(filters, options);
+        (0, sendResponse_1.default)(res, {
+            statusCode: http_status_1.default.OK,
+            success: true,
+            message: 'Payments fetched successfully',
+            meta: result.meta,
+            data: result.data,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+// const getByIdFromDB = async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const { id } = req.params;
+//         const result = await PaymentService.getByIdFromDB(id);
+//         sendResponse(res, {
+//             statusCode: httpStatus.OK,
+//             success: true,
+//             message: 'Payment fetched successfully',
+//             data: result
+//         });
+//     } catch (error) {
+//         next(error);
+//     }
+// };
 exports.PaymentController = {
-  postPayment,
+    initPayment,
+    webhook,
+    getAllFromDB,
+    // getByIdFromDB
 };
