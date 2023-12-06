@@ -47,24 +47,28 @@ const getAllFromDB = async (
   }
 };
 
-// const getByIdFromDB = async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//         const { id } = req.params;
-//         const result = await PaymentService.getByIdFromDB(id);
-//         sendResponse(res, {
-//             statusCode: httpStatus.OK,
-//             success: true,
-//             message: 'Payment fetched successfully',
-//             data: result
-//         });
-//     } catch (error) {
-//         next(error);
-//     }
-// };
+const deleteFromDB = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const result = await PaymentService.deleteFromDB(id);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Payment delete successfully',
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const PaymentController = {
   initPayment,
   webhook,
   getAllFromDB,
-  // getByIdFromDB
+  deleteFromDB,
 };

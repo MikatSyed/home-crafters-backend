@@ -25,6 +25,7 @@ const insertIntoDB = async (data: Service): Promise<Service> => {
     name,
   } = data;
   let { serviceImg } = data;
+  console.log(serviceImg, 'ggg');
 
   const isNameExist = await prisma.user.findFirst({
     where: {
@@ -272,26 +273,48 @@ const updateOneInDB = async (
 };
 
 const deleteByIdFromDB = async (id: string): Promise<Service> => {
-  const isserviceExist = await prisma.service.findFirst({
-    where: {
-      id,
-    },
+  let result: Service;
+
+  await prisma.$transaction(async transaction => {
+    const isserviceExist = await transaction.service.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        bookings: true, // Include bookings relation
+      },
+    });
+
+    if (!isserviceExist) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'service does not exist');
+    }
+
+    // Delete bookings associated with the service
+    await transaction.booking.deleteMany({
+      where: {
+        serviceId: id,
+      },
+    });
+
+    // Delete reviews associated with the service
+    await transaction.review.deleteMany({
+      where: {
+        serviceId: id,
+      },
+    });
+
+    // Delete the service
+    result = await transaction.service.delete({
+      where: {
+        id,
+      },
+      include: {
+        category: true,
+      },
+    });
   });
 
-  if (!isserviceExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'service does not exist');
-  }
-  const result = await prisma.service.delete({
-    where: {
-      id,
-    },
-
-    include: {
-      category: true,
-    },
-  });
-
-  return result;
+  return result!;
 };
 
 export const ServiceServices = {

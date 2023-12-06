@@ -128,18 +128,18 @@ const getAllFromDB = async (
   };
 };
 
-// const getByIdFromDB = async (id: string): Promise<Payment | null> => {
-//     const result = await prisma.payment.findUnique({
-//         where: {
-//             id
-//         }
-//     });
-//     return result;
-// };
+const deleteFromDB = async (id: string): Promise<Payment | null> => {
+  const result = await prisma.payment.delete({
+    where: {
+      id,
+    },
+  });
+  return result;
+};
 
 export const PaymentService = {
   initPayment,
   webhook,
   getAllFromDB,
-  // getByIdFromDB
+  deleteFromDB,
 };

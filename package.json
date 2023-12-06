@@ -15,7 +15,7 @@
     "postinstall": "prisma generate",
     "build": "tsc"
   },
-  "author": "Mikat Syed",  
+  "author": "Mikat Syed",
   "license": "ISC",
   "lint-staged": {
     "src/**/*.ts": "yarn lint-prettier"

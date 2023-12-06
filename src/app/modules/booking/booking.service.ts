@@ -53,7 +53,7 @@ const getAllFromDB = async (): Promise<Booking[]> => {
       user: true, // Include the User relation
       service: true, // Include the Service relation
       slot: true, // Include the TimeSlots relation
-      payments: true, // Include the Payment relation
+      // Include the Payment relation
     },
   });
   return result;
@@ -78,7 +78,7 @@ const getByIdFromDB = async (id: string): Promise<Booking | null> => {
       user: true, // Include the User relation
       service: true, // Include the Service relation
       slot: true, // Include the TimeSlots relation
-      payments: true, // Include the Payment relation
+      // Include the Payment relation
     },
   });
   return result;
@@ -144,9 +144,6 @@ const deleteByIdFromDB = async (id: string): Promise<Booking> => {
     const data = await transactionClient.booking.delete({
       where: {
         id,
-      },
-      include: {
-        payments: true,
       },
     });
     return data;
