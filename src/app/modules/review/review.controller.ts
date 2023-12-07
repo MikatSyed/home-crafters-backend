@@ -32,7 +32,7 @@ const getReviewByServiceId: RequestHandler = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Review post successfully',
+    message: 'Review retrived successfully',
     data: result,
   });
 });

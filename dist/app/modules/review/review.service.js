@@ -35,6 +35,7 @@ const getAllReview = () => __awaiter(void 0, void 0, void 0, function* () {
     };
 });
 const getReviewByServiceId = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('Hitted');
     const result = yield prisma_1.default.review.findMany({
         where: {
             serviceId: id,

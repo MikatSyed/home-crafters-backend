@@ -229,9 +229,30 @@ const getByIdFromDB = async (id: string): Promise<Service | null> => {
       bookings: true,
     },
   });
+
+  if (result) {
+    if (result?.reviews && result.reviews.length > 0) {
+      const totalReviews = result.reviews.length;
+
+      // Calculate average rating
+      const sumOfRatings = result.reviews.reduce(
+        (sum: number, review: any) => sum + (review.rating || 0),
+        0
+      );
+      const averageRating = sumOfRatings / totalReviews;
+
+      // Add the calculated values to the result object
+      result.averageRating = averageRating;
+      result.totalReviews = totalReviews;
+    } else {
+      // If there are no reviews, set default values
+      result.averageRating = null;
+      result.totalReviews = null;
+    }
+  }
+
   return result;
 };
-
 const updateOneInDB = async (
   id: string,
   payload: Partial<Service>

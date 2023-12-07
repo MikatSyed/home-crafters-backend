@@ -23,6 +23,7 @@ const getAllReview = async (): Promise<Review[] | any> => {
 };
 
 const getReviewByServiceId = async (id: string): Promise<Review[] | null> => {
+  console.log('Hitted');
   const result = await prisma.review.findMany({
     where: {
       serviceId: id,

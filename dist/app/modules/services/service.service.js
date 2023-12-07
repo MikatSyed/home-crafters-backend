@@ -213,6 +213,22 @@ const getByIdFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
             bookings: true,
         },
     });
+    if (result) {
+        if ((result === null || result === void 0 ? void 0 : result.reviews) && result.reviews.length > 0) {
+            const totalReviews = result.reviews.length;
+            // Calculate average rating
+            const sumOfRatings = result.reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
+            const averageRating = sumOfRatings / totalReviews;
+            // Add the calculated values to the result object
+            result.averageRating = averageRating;
+            result.totalReviews = totalReviews;
+        }
+        else {
+            // If there are no reviews, set default values
+            result.averageRating = null;
+            result.totalReviews = null;
+        }
+    }
     return result;
 });
 const updateOneInDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -273,7 +289,7 @@ const deleteByIdFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () 
                 id,
             },
             include: {
-                category: true
+                category: true,
             },
         });
     }));
