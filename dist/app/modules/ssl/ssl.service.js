@@ -28,7 +28,7 @@ const initPayment = (payload) => __awaiter(void 0, void 0, void 0, function* () 
             success_url: `https://home-crafter-mikatsyed.vercel.app/success?transectionId=${payload.tran_id}`,
             fail_url: `https://home-crafter-mikatsyed.vercel.app/fail?transectionId=${payload.tran_id}`,
             cancel_url: `https://home-crafter-mikatsyed.vercel.app/cancel`,
-            ipn_url: 'https://home-crafter-mikatsyed.vercel.app/ipn',
+            ipn_url: 'http://localhost:3030/ipn',
             shipping_method: 'N/A',
             product_name: 'Service Payment',
             product_category: 'Payment',
