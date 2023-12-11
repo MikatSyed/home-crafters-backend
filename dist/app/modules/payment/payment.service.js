@@ -191,5 +191,5 @@ exports.PaymentService = {
     webhook,
     getAllFromDB,
     deleteFromDB,
-    paymentVerify
+    paymentVerify,
 };

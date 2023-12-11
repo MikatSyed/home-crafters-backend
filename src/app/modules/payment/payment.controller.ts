@@ -33,7 +33,7 @@ const paymentVerify = async (req: Request, res: Response) => {
 
     // Redirect after sending the response
     res.redirect(
-      `http://localhost:3000/success?transactionId=${result?.transactionId}`
+      `https://home-crafter-mikatsyed.vercel.app/success?transactionId=${result?.transactionId}`
     );
   } else {
     // Handle the case where the update failed

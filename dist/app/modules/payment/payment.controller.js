@@ -41,7 +41,7 @@ const paymentVerify = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         //   data: result,
         // });
         // Redirect after sending the response
-        res.redirect(`http://localhost:3000/success?transactionId=${result === null || result === void 0 ? void 0 : result.transactionId}`);
+        res.redirect(`https://home-crafter-mikatsyed.vercel.app/success?transactionId=${result === null || result === void 0 ? void 0 : result.transactionId}`);
     }
     else {
         // Handle the case where the update failed
