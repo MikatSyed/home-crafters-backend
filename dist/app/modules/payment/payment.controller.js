@@ -27,6 +27,31 @@ const initPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         data: result,
     });
 });
+const paymentVerify = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { transactionId } = req.query;
+    const result = yield payment_service_1.PaymentService.paymentVerify(transactionId);
+    console.log(result === null || result === void 0 ? void 0 : result.transactionId, 'aaaaa');
+    // Check if the update was successful
+    if (result && result.count > 0) {
+        // Send a success response
+        // sendResponse(res, {
+        //   success: true,
+        //   statusCode: httpStatus.OK,
+        //   message: 'Payment verified!',
+        //   data: result,
+        // });
+        // Redirect after sending the response
+        res.redirect(`http://localhost:3000/success?transactionId=${result === null || result === void 0 ? void 0 : result.transactionId}`);
+    }
+    else {
+        // Handle the case where the update failed
+        (0, sendResponse_1.default)(res, {
+            success: false,
+            statusCode: http_status_1.default.INTERNAL_SERVER_ERROR,
+            message: 'Payment verification failed',
+        });
+    }
+});
 const webhook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield payment_service_1.PaymentService.webhook(req.query);
     (0, sendResponse_1.default)(res, {
@@ -70,6 +95,7 @@ const deleteFromDB = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.PaymentController = {
     initPayment,
+    paymentVerify,
     webhook,
     getAllFromDB,
     deleteFromDB,

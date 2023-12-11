@@ -11,7 +11,7 @@ const initPayment = async (payload: any) => {
       total_amount: payload.total_amount,
       currency: 'BDT',
       tran_id: payload.tran_id, // use unique tran_id for each api call
-      success_url: `https://home-crafter-mikatsyed.vercel.app/success?transectionId=${payload.tran_id}`,
+      success_url: `http://localhost:6060/api/v1/payment/success?transectionId=${payload.tran_id}`,
       fail_url: `https://home-crafter-mikatsyed.vercel.app/fail?transectionId=${payload.tran_id}`,
       cancel_url: `https://home-crafter-mikatsyed.vercel.app/cancel`,
       ipn_url: 'http://localhost:3030/ipn',

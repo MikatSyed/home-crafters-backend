@@ -55,6 +55,9 @@ const getAllFromDB = async (): Promise<Booking[]> => {
       slot: true, // Include the TimeSlots relation
       // Include the Payment relation
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
   return result;
 };

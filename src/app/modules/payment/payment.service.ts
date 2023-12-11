@@ -2,10 +2,12 @@
 import { Payment, PaymentStatus, Prisma } from '@prisma/client';
 import { IGenericResponse } from '../../../interfaces/common';
 import prisma from '../../../shared/prisma';
-
 import { paymentSearchableFields } from './payment.constants';
 import { queryHelpers } from '../../../helpers/queryHelpers';
 import { sslService } from '../ssl/ssl.service';
+
+import ApiError from '../../../errors/ApiError';
+import httpStatus from 'http-status';
 
 const initPayment = async (data: any) => {
   function generateSixDigitId() {
@@ -40,6 +42,56 @@ const initPayment = async (data: any) => {
   // return pdata;
 };
 
+// const paymentVerify = async (id: any) => {
+//   const result = await prisma.payment.updateMany({
+//     where: {
+//       transactionId: id,
+//     },
+//     data: {
+//       status: PaymentStatus.PAID,
+//     },
+//   });
+
+//   // Return the result or use it in the calling function
+//   return result;
+// };
+
+const paymentVerify = async (id: any): Promise<any> => {
+  const isPaymentExist = await prisma.payment.findFirst({
+    where: {
+      id,
+    },
+  });
+
+  if (!isPaymentExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Payment does not exist');
+  }
+  const result = await prisma.$transaction(async transactionClient => {
+    // Update payment status to PAID
+    const updatedPayments = await transactionClient.payment.updateMany({
+      where: {
+        transactionId: id,
+      },
+      data: {
+        status: PaymentStatus.PAID,
+      },
+    });
+
+    if (updatedPayments) {
+      await transactionClient.booking.update({
+        where: {
+          id: isPaymentExist?.bookingId,
+        },
+        data: {
+          isPaid: true,
+        },
+      });
+    }
+
+    return updatedPayments;
+  });
+  return result;
+};
 const webhook = async (payload: any) => {
   if (!payload || !payload?.status || payload?.status !== 'VALID') {
     return {
@@ -142,4 +194,5 @@ export const PaymentService = {
   webhook,
   getAllFromDB,
   deleteFromDB,
+  paymentVerify,
 };

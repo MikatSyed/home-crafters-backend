@@ -16,6 +16,35 @@ const initPayment = async (req: Request, res: Response) => {
   });
 };
 
+const paymentVerify = async (req: Request, res: Response) => {
+  const { transactionId } = req.query;
+
+  const result = await PaymentService.paymentVerify(transactionId);
+  console.log(result?.transactionId, 'aaaaa');
+  // Check if the update was successful
+  if (result && result.count > 0) {
+    // Send a success response
+    // sendResponse(res, {
+    //   success: true,
+    //   statusCode: httpStatus.OK,
+    //   message: 'Payment verified!',
+    //   data: result,
+    // });
+
+    // Redirect after sending the response
+    res.redirect(
+      `http://localhost:3000/success?transactionId=${result?.transactionId}`
+    );
+  } else {
+    // Handle the case where the update failed
+    sendResponse(res, {
+      success: false,
+      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Payment verification failed',
+    });
+  }
+};
+
 const webhook = async (req: Request, res: Response) => {
   const result = await PaymentService.webhook(req.query);
   sendResponse(res, {
@@ -68,6 +97,7 @@ const deleteFromDB = async (
 
 export const PaymentController = {
   initPayment,
+  paymentVerify,
   webhook,
   getAllFromDB,
   deleteFromDB,

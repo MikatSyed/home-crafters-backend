@@ -30,6 +30,8 @@ const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const payment_constants_1 = require("./payment.constants");
 const queryHelpers_1 = require("../../../helpers/queryHelpers");
 const ssl_service_1 = require("../ssl/ssl.service");
+const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
+const http_status_1 = __importDefault(require("http-status"));
 const initPayment = (data) => __awaiter(void 0, void 0, void 0, function* () {
     function generateSixDigitId() {
         const timestamp = Date.now();
@@ -58,6 +60,51 @@ const initPayment = (data) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(pdata);
     return paymentSession.redirectGatewayURL;
     // return pdata;
+});
+// const paymentVerify = async (id: any) => {
+//   const result = await prisma.payment.updateMany({
+//     where: {
+//       transactionId: id,
+//     },
+//     data: {
+//       status: PaymentStatus.PAID,
+//     },
+//   });
+//   // Return the result or use it in the calling function
+//   return result;
+// };
+const paymentVerify = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const isPaymentExist = yield prisma_1.default.payment.findFirst({
+        where: {
+            id,
+        },
+    });
+    if (!isPaymentExist) {
+        throw new ApiError_1.default(http_status_1.default.NOT_FOUND, 'Payment does not exist');
+    }
+    const result = yield prisma_1.default.$transaction((transactionClient) => __awaiter(void 0, void 0, void 0, function* () {
+        // Update payment status to PAID
+        const updatedPayments = yield transactionClient.payment.updateMany({
+            where: {
+                transactionId: id,
+            },
+            data: {
+                status: client_1.PaymentStatus.PAID,
+            },
+        });
+        if (updatedPayments) {
+            yield transactionClient.booking.update({
+                where: {
+                    id: isPaymentExist === null || isPaymentExist === void 0 ? void 0 : isPaymentExist.bookingId,
+                },
+                data: {
+                    isPaid: true,
+                },
+            });
+        }
+        return updatedPayments;
+    }));
+    return result;
 });
 const webhook = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     if (!payload || !(payload === null || payload === void 0 ? void 0 : payload.status) || (payload === null || payload === void 0 ? void 0 : payload.status) !== 'VALID') {
@@ -144,4 +191,5 @@ exports.PaymentService = {
     webhook,
     getAllFromDB,
     deleteFromDB,
+    paymentVerify
 };

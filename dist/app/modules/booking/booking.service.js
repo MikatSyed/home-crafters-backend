@@ -62,6 +62,9 @@ const getAllFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
             slot: true, // Include the TimeSlots relation
             // Include the Payment relation
         },
+        orderBy: {
+            createdAt: 'desc',
+        },
     });
     return result;
 });
