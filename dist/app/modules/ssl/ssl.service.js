@@ -25,7 +25,7 @@ const initPayment = (payload) => __awaiter(void 0, void 0, void 0, function* () 
             total_amount: payload.total_amount,
             currency: 'BDT',
             tran_id: payload.tran_id,
-            success_url: `https://home-crafter-mikatsyed.vercel.app/api/v1/payment/success?transectionId=${payload.tran_id}`,
+            success_url: `https://home-crafters-mikatsyed.vercel.app/api/v1/payment/success?transectionId=${payload.tran_id}`,
             fail_url: `https://home-crafter-mikatsyed.vercel.app/fail?transectionId=${payload.tran_id}`,
             cancel_url: `https://home-crafter-mikatsyed.vercel.app/cancel`,
             ipn_url: 'http://localhost:3030/ipn',
