@@ -6,14 +6,16 @@ import { ServiceController } from './service.controller';
 import { ServiceValidation } from './services.validate';
 
 const router = express.Router();
+
+router.get('/', ServiceController.getAllFromDB);
+
+router.get('/overview', ServiceController.getOverview);
 router.post(
   '/',
   validateRequest(ServiceValidation.createServiceZodSchema),
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
   ServiceController.insertIntoDB
 );
-
-router.get('/', ServiceController.getAllFromDB);
 
 // router.get('/:categoryId/category', BookController.getByCategoryIdFromDB);
 

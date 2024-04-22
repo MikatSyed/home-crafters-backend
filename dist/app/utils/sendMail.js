@@ -12,16 +12,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProfileService = void 0;
-const prisma_1 = __importDefault(require("../../../shared/prisma"));
-const getUserProfile = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.user.findFirst({
-        where: {
-            id,
+exports.sendEMail = void 0;
+//  send mail function
+const nodemailer_1 = __importDefault(require("nodemailer"));
+const config_1 = __importDefault(require("../../config"));
+const sendEMail = (fromEmail, toEmail, subject, html) => __awaiter(void 0, void 0, void 0, function* () {
+    const transporter = nodemailer_1.default.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+            user: config_1.default.SMTP_MAIL,
+            pass: config_1.default.SMTP_PASSWORD,
         },
     });
-    return result;
+    const mailOptions = {
+        from: fromEmail,
+        to: toEmail,
+        subject: subject,
+        html: html,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            console.log('Email sent: ' + info.response);
+        }
+    });
 });
-exports.ProfileService = {
-    getUserProfile,
-};
+exports.sendEMail = sendEMail;
