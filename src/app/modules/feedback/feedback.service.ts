@@ -1,14 +1,14 @@
-import { Feedback } from '@prisma/client';
-import prisma from '../../../shared/prisma';
+// import { Feedback } from '@prisma/client';
+// import prisma from '../../../shared/prisma';
 
-const createFeedBack = async (data: Feedback): Promise<Feedback> => {
-  const result = await prisma.feedback.create({
-    data,
-  });
+// const createFeedBack = async (data: Feedback): Promise<Feedback> => {
+//   const result = await prisma.feedback.create({
+//     data,
+//   });
 
-  return result;
-};
+//   return result;
+// };
 
-export const FeedBackService = {
-  createFeedBack,
-};
+// export const FeedBackService = {
+//   createFeedBack,
+// };

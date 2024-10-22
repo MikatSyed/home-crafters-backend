@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const createCategoryZodSchema = z.object({
   body: z.object({
-    title: z.string({
+    categoryName: z.string({
       required_error: 'Title is required',
     }),
     categoryImg: z.string({
@@ -12,8 +12,8 @@ const createCategoryZodSchema = z.object({
 });
 const updateCategoryZodSchema = z.object({
   body: z.object({
-    title: z.string({
-      required_error: 'Title is required',
+    categoryName: z.string({
+      required_error: 'categoryName is required',
     }),
   }),
 });

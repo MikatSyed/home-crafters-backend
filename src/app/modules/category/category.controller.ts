@@ -29,17 +29,29 @@ const getAllFromDB: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
-const getByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await CategoryService.getByIdFromDB(id);
+const getAllNameFromDB: RequestHandler = catchAsync(async (req, res) => {
+  
+  const result = await CategoryService.getAllNameFromDB();
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Category fetched successfully',
-    data: result,
+    message: 'Categories fetched successfully',
+    data: result
   });
 });
+
+// const getByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+//   const result = await CategoryService.getByIdFromDB(id);
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Category fetched successfully',
+//     data: result,
+//   });
+// });
 
 const updateOneInDB: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -68,7 +80,8 @@ const deleteByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
 export const CategoryController = {
   insertIntoDB,
   getAllFromDB,
-  getByIdFromDB,
+  getAllNameFromDB,
+  // getByIdFromDB,
   updateOneInDB,
   deleteByIdFromDB,
 };

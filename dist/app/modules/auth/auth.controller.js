@@ -39,9 +39,36 @@ const createUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
         data: result,
     });
 }));
+const ProviderSignup = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield auth_service_1.AuthService.ProviderSignup(req.body);
+    delete result.password;
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_1.default.OK,
+        message: 'Account created. Await admin approval and check your email',
+        data: result,
+    });
+}));
 const loginUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const loginData = __rest(req.body, []);
     const result = yield auth_service_1.AuthService.LoginUser(loginData);
+    const { refreshToken, token } = result;
+    //set refresh token into cookie
+    const cookieOptions = {
+        secure: config_1.default.env === 'production',
+        httpOnly: true,
+    };
+    res.cookie('refreshToken', refreshToken, cookieOptions);
+    res.send({
+        statusCode: 200,
+        success: true,
+        message: 'Login Successfully!',
+        token,
+    });
+}));
+const loginProvider = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const loginData = __rest(req.body, []);
+    const result = yield auth_service_1.AuthService.LoginProvider(loginData);
     const { refreshToken, token } = result;
     //set refresh token into cookie
     const cookieOptions = {
@@ -82,9 +109,31 @@ const changePassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
         message: 'Password changed successfully !',
     });
 }));
+const forgotPassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.body;
+    const message = yield auth_service_1.AuthService.forgotPassword(email);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: message
+    });
+}));
+const resetPassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { token, newPassword } = req.body;
+    const message = yield auth_service_1.AuthService.resetPassword(token, newPassword);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: message
+    });
+}));
 exports.AuthController = {
     createUser,
+    ProviderSignup,
     loginUser,
+    loginProvider,
     refreshToken,
     changePassword,
+    forgotPassword,
+    resetPassword
 };

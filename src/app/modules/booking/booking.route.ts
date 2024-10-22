@@ -5,22 +5,23 @@ import { BookingController } from './booking.controller';
 
 const router = express.Router();
 
+router.get('/user',auth(ENUM_USER_ROLE.USER), BookingController.getAllFromDBForUser);
 router.get('/check-available-slot', BookingController.fetchBookingsForDate);
 router.get('/:id', BookingController.getByIdFromDB);
 router.get('/statistics', BookingController.getStatistics);
 
 router.post(
   '/',
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.USER),
+  auth(ENUM_USER_ROLE.USER),
   BookingController.insertIntoDB
 );
 
-router.get('/', BookingController.getAllFromDB);
+router.get('/',auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.PROVIDER), BookingController.getAllFromDB);
 
 router.patch(
   '/:id',
 
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.PROVIDER),
   BookingController.updateOneInDB
 );
 router.delete(

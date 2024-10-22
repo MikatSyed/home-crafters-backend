@@ -13,9 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEMail = void 0;
-//  send mail function
 const nodemailer_1 = __importDefault(require("nodemailer"));
-const config_1 = __importDefault(require("../../config"));
+const config_1 = __importDefault(require("../../config")); // Ensure config has SMTP details
 const sendEMail = (fromEmail, toEmail, subject, html) => __awaiter(void 0, void 0, void 0, function* () {
     const transporter = nodemailer_1.default.createTransport({
         host: 'smtp.gmail.com',
@@ -32,13 +31,13 @@ const sendEMail = (fromEmail, toEmail, subject, html) => __awaiter(void 0, void 
         subject: subject,
         html: html,
     };
-    transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-            console.log(error);
-        }
-        else {
-            console.log('Email sent: ' + info.response);
-        }
-    });
+    try {
+        const info = yield transporter.sendMail(mailOptions);
+        // console.log('Email sent: ' + info.response);
+    }
+    catch (error) {
+        console.error('Error sending email:', error);
+        throw new Error('Failed to send email'); // Optional: You can rethrow to handle it higher up if needed
+    }
 });
 exports.sendEMail = sendEMail;

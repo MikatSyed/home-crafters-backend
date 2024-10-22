@@ -10,23 +10,23 @@ const router = express.Router();
 
 router.get(
   '/',
-  auth(ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.ADMIN),
+  auth( ENUM_USER_ROLE.ADMIN),
   UserController.getAllUsers
 );
 router.get(
   '/:id',
-  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.ADMIN),
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.PROVIDER, ENUM_USER_ROLE.ADMIN),
   UserController.getByIdFromDB
 );
 router.patch(
   '/:id',
   validateRequest(UserValidation.userUpdateZodSchema),
-  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.ADMIN),
+  auth(ENUM_USER_ROLE.USER),
   UserController.updateOneInDB
 );
 router.delete(
   '/:id',
-  auth(ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.ADMIN),
+  auth(ENUM_USER_ROLE.PROVIDER, ENUM_USER_ROLE.ADMIN),
   UserController.deleteByIdFromDB
 );
 

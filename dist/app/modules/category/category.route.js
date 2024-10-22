@@ -11,9 +11,13 @@ const category_validation_1 = require("./category.validation");
 const auth_1 = __importDefault(require("../../middlewares/auth"));
 const user_1 = require("../../../enums/user");
 const router = express_1.default.Router();
-router.post('/', (0, validateRequest_1.default)(category_validation_1.CategoryValidation.createCategoryZodSchema), (0, auth_1.default)(user_1.ENUM_USER_ROLE.ADMIN), category_controller_1.CategoryController.insertIntoDB);
+router.post('/', 
+// validateRequest(CategoryValidation.createCategoryZodSchema),
+// auth(ENUM_USER_ROLE.ADMIN,ENUM_USER_ROLE.SUPER_ADMIN),
+category_controller_1.CategoryController.insertIntoDB);
 router.get('/', category_controller_1.CategoryController.getAllFromDB);
-router.get('/:id', category_controller_1.CategoryController.getByIdFromDB);
-router.patch('/:id', (0, validateRequest_1.default)(category_validation_1.CategoryValidation.updateCategoryZodSchema), (0, auth_1.default)(user_1.ENUM_USER_ROLE.ADMIN, user_1.ENUM_USER_ROLE.SUPER_ADMIN), category_controller_1.CategoryController.updateOneInDB);
-router.delete('/:id', (0, auth_1.default)(user_1.ENUM_USER_ROLE.ADMIN, user_1.ENUM_USER_ROLE.SUPER_ADMIN), category_controller_1.CategoryController.deleteByIdFromDB);
+router.get('/name', category_controller_1.CategoryController.getAllNameFromDB);
+// router.get('/:id', CategoryController.getByIdFromDB);
+router.patch('/:id', (0, validateRequest_1.default)(category_validation_1.CategoryValidation.updateCategoryZodSchema), (0, auth_1.default)(user_1.ENUM_USER_ROLE.ADMIN, user_1.ENUM_USER_ROLE.PROVIDER), category_controller_1.CategoryController.updateOneInDB);
+router.delete('/:id', (0, auth_1.default)(user_1.ENUM_USER_ROLE.ADMIN, user_1.ENUM_USER_ROLE.PROVIDER), category_controller_1.CategoryController.deleteByIdFromDB);
 exports.CategoryRoutes = router;

@@ -7,7 +7,8 @@ import httpStatus from 'http-status';
 import { ServiceServices } from './service.service';
 
 const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
-  const result = await ServiceServices.insertIntoDB(req.body);
+  const providerId = req?.provider?.providerId
+  const result = await ServiceServices.insertIntoDB(req.body,providerId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -19,10 +20,8 @@ const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
 
 const getAllFromDB: RequestHandler = catchAsync(async (req, res) => {
   const filters = pick(req.query, ServiceFilterableFields);
-  console.log({ filters });
-
   const queryOptions = pick(req.query, queryFields);
-  console.log(queryOptions);
+
 
   const result = await ServiceServices.getAllFromDB(filters, queryOptions);
   sendResponse(res, {
@@ -34,6 +33,86 @@ const getAllFromDB: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const getSingleProviderServiceFromDB: RequestHandler = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await ServiceServices.getSingleProviderServiceFromDB(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'provider fetched successfully',
+    data: result,
+  });
+});
+const getAllProviderServiceFromDB: RequestHandler = catchAsync(async (req, res) => {
+  const providerId = req?.provider?.providerId
+  const result = await ServiceServices.getAllProviderServiceFromDB(providerId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Service fetched successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
+
+const getAllOfferedServicesProvidersFromDB: RequestHandler = catchAsync(async (req, res) => {
+  const providerId = req?.provider?.providerId
+  const result = await ServiceServices.getAllOfferedServicesProvidersFromDB(providerId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Offered Service fetched successfully',
+    data: result
+  });
+});
+const getAllOfferedServicesFromDB: RequestHandler = catchAsync(async (req, res) => {
+ 
+  const result = await ServiceServices.getAllOfferedServicesFromDB();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Offered Service fetched successfully',
+    data: result
+  });
+});
+const getMostPopularServicesFromDB: RequestHandler = catchAsync(async (req, res) => {
+ 
+  const result = await ServiceServices.getMostPopularServicesFromDB();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Most Popular Service fetched successfully',
+    data: result
+  });
+});
+
+
+const deleteOfferedServiceFromDB: RequestHandler = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await ServiceServices.deleteOfferedServiceFromDB(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Offered Service deleted successfully',
+    data: result,
+  });
+});
+
+
+const updateServicePriceByOffer: RequestHandler = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const {offerId} = req.body;
+  const result = await ServiceServices.updateServicePriceByOffer(id,offerId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Offer applied successfully',
+    data: result,
+  });
+});
 const getByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await ServiceServices.getByIdFromDB(id);
@@ -70,7 +149,8 @@ const deleteByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getOverview: RequestHandler = catchAsync(async (req, res) => {
-  const result = await ServiceServices.getOverview();
+  const providerId = req?.provider?.providerId
+  const result = await ServiceServices.getOverview(providerId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -80,11 +160,45 @@ const getOverview: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const getAdditionalServiceFromDB: RequestHandler = catchAsync(async (req, res) => {
+  const serviceId  = req.query.serviceId as string;
+  const result = await ServiceServices.getAdditionalServiceFromDB(serviceId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Latest Blogs fetched successfully',
+    data: result,
+  });
+});
+
+const getRelatedServiceFromDB: RequestHandler = catchAsync(async (req, res) => {
+  console.log(req.query,'41')
+  const categoryId = req.query.categoryId as string;
+  const serviceId  = req.query.serviceId as string;
+  const result = await ServiceServices.getRelatedServiceFromDB(categoryId,serviceId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Similar Blogs fetched successfully',
+    data: result,
+  });
+});
+
 export const ServiceController = {
   insertIntoDB,
   getAllFromDB,
-  // getByCategoryIdFromDB,
+  getSingleProviderServiceFromDB,
+  getAllProviderServiceFromDB,
+  getAllOfferedServicesProvidersFromDB,
+  getAllOfferedServicesFromDB,
+  deleteOfferedServiceFromDB,
+  updateServicePriceByOffer,
   getByIdFromDB,
+  getAdditionalServiceFromDB,
+  getRelatedServiceFromDB,
+  getMostPopularServicesFromDB,
   updateOneInDB,
   deleteByIdFromDB,
   getOverview,

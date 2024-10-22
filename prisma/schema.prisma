@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,112 +8,264 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(uuid())
-  name       String
-  email      String    @unique
-  password   String
-  role       Role      @default(user)
-  contactNo  String
-  address    String
-  profileImg String[]
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  bookings   Booking[]
-  reviews    Review[]
+  id                    String    @id @default(uuid())
+  fName                 String
+  lName                 String
+  email                 String    @unique
+  password              String
+  role                  Role      @default(User)
+  contactNo             String
+  resetPasswordToken    String?    
+  resetPasswordExpire   DateTime?  
+  profileImg            String[]
+  bookings              Booking[]
+  ComboBooking          ComboBooking[]
+  reviews               Review[]
+  reviewProviders       ReviewProvider[]
+  comments              Comment[]
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   @@map("users")
 }
 
+model Provider { 
+  id                  String         @id @default(uuid())
+  fName               String
+  lName               String
+  email               String         @unique
+  password            String
+  role                ProviderRole   @default(Provider)
+  gender              String
+  dob                 DateTime       @db.Date
+  bio                 String
+  categoryId          String? 
+  category            Category?      @relation(fields: [categoryId], references: [id])
+  contactNo           String
+  address             String
+  resetPasswordToken  String?   
+  resetPasswordExpire DateTime?  
+  profileImg          String[]
+  services            Service[]
+  availability        Availability[]
+  reviewProviders     ReviewProvider[]
+  offers              Offer[]
+  blogs               Blog[]
+  comboPack           ComboPack[]
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  approvalStatus      ApprovalStatus @default(Pending)
+
+  @@map("providers")
+}
+
 model Service {
-  id            String      @id @default(uuid())
-  name          String      @unique
-  description   String?
-  price         Int
-  location      String
-  availbility   Availbility
-  serviceImg    String[]
-  duration      String?
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
-  averageRating Float?
-  totalReviews  Int?
-  categoryId    String
-  category      Category    @relation(fields: [categoryId], references: [id])
-  reviews       Review[]
-  bookings      Booking[]
+  id                 String       @id @default(uuid())
+  serviceName        String       @unique
+  description        String
+  regularPrice       Int
+  offeredPrice       Int?
+  location           String
+  duration           String
+  videoUrl           String?
+  serviceImg         String[]
+  status             ServiceStatus @default(Active)
+  categoryId         String
+  keyFeature1        String?
+  keyFeature2        String?
+  keyFeature3        String?
+  keyFeature4        String?
+  category           Category      @relation(fields: [categoryId], references: [id])
+  providerId         String
+  provider           Provider      @relation(fields: [providerId], references: [id])
+  offerId            String?       
+  offer              Offer?        @relation("ServiceOffer", fields: [offerId], references: [id], onDelete: SetNull)
+  bookings           Booking[]
+  reviews            Review[]
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
 
   @@map("services")
 }
 
-model Booking {
-  id          String    @id @default(uuid())
-  bookingDate String    @map("booking_date")
-  status      Status    @default(pending)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  userId      String    @map("patient_id")
-  serviceId   String    @map("service_id")
-  slotId      String    @map("slot_id")
-  isPaid      Boolean   @default(false)
-  user        User      @relation(fields: [userId], references: [id])
-  service     Service   @relation(fields: [serviceId], references: [id])
-  slot        TimeSlots @relation(fields: [slotId], references: [id])
-
-  @@unique([slotId, serviceId, bookingDate])
-  @@map("bookings")
+model ComboPack{
+   id                 String    @id @default(uuid())
+   comboName          String   @unique
+   plan               String
+   services           String[]
+   amount             Int
+   discountAmount     Int
+   discount           Int
+   providerId         String
+   provider           Provider      @relation(fields: [providerId], references: [id])
+   ComboBooking       ComboBooking[]
+  @@map("comboPack")
 }
 
+
 model Category {
-  id          String    @id @default(uuid())
-  title       String    @unique
-  categoryImg String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  services    Service[]
+  id           String    @id @default(uuid())
+  categoryName String   @unique
+  categoryImg  String
+  categoryIcon String
+  services     Service[]
+  providers    Provider[]  
+  blogs        Blog[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@map("categories")
 }
 
+model Availability {
+  id         String   @id @default(uuid())
+  day        String   @map("day") 
+  slots      String[] @default([]) @map("slots") 
+  providerId String
+  provider   Provider @relation(fields: [providerId], references: [id])
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("availabilities")
+}
+
+model Booking {
+  id                String          @id @default(uuid())
+  bookingDate       DateTime        @map("bookingDate") @db.Date
+  Day               String          @map("day")
+  Time              String          @map("time")
+  userId            String          @map("userId")
+  serviceId         String          @map("serviceId")
+  isPaid            PaymentStatus   @default(Unpaid)
+  status            Status          @default(Pending)
+  workStatus        WorkStatus      @default(Pending)
+  user              User            @relation(fields: [userId], references: [id])
+  service           Service         @relation(fields: [serviceId], references: [id])
+  Payment           Payment[]
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  @@unique([Day, Time, serviceId, bookingDate])
+  @@map("bookings")
+}
+
+model ComboBooking {
+  id                String          @id @default(uuid())
+  userId            String          @map("userId")
+  comboId           String          @map("comboId")
+  isPaid            PaymentStatus   @default(Unpaid)
+  status            Status          @default(Pending)
+  user              User            @relation(fields: [userId], references: [id])
+  ComboPack         ComboPack       @relation(fields: [comboId], references: [id])
+  ComboPayment      ComboPayment[]
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  
+  @@map("comboBookings")
+}
+
 model Payment {
-  id     String @id @default(uuid())
-  amount Int
-  userId String
-
-  bookingId String
-
-  status             PaymentStatus @default(PANDING)
-  transactionId      String
-  paymentGatewayData Json?
-
-  createdAt DateTime? @default(now())
-  updatedAt DateTime? @updatedAt
+  id              String          @id @default(uuid())
+  amount          Int
+  bookingId       String          @map("bookingId")
+  transactionId   String
+  address         String
+  country         String
+  state           String
+  city            String
+  zipCode         String
+  status          Status          @default(Pending)
+  booking         Booking         @relation(fields: [bookingId], references: [id])
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
 
   @@map("payment")
 }
 
-model TimeSlots {
-  id        String @id @default(uuid())
-  startTime String @unique @map("start_time")
+model ComboPayment {
+  id              String          @id @default(uuid())
+  amount          Int
+  comboBookingId  String          @map("comboBookingId")
+  transactionId   String
+  address         String
+  country         String
+  state           String
+  city            String
+  zipCode         String
+  status          Status          @default(Pending)
+  ComboBooking    ComboBooking    @relation(fields: [comboBookingId], references: [id])
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("comboPayment")
+}
 
-  bookings Booking[]
+model Blog {
+  id          String        @id @default(uuid())
+  title       String        @unique
+  content     String
+  blogImg     String[]
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  providerId  String
+  provider    Provider @relation(fields: [providerId], references: [id])
+  comments    Comment[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@map("time_slots")
+  @@map("blogs")
 }
 
 model Review {
-  id        String   @id @default(uuid())
-  userId    String
-  serviceId String
-  rating    Float
-  comment   String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  service   Service  @relation(fields: [serviceId], references: [id])
+  id         String   @id @default(uuid())
+  userId     String
+  serviceId  String
+  rating     Float
+  comment    String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  service    Service  @relation(fields: [serviceId], references: [id])
 
   @@map("reviews")
+}
+model Comment {
+  id        String     @id @default(uuid())
+  userId    String
+  blogId    String
+  comment   String
+  user      User     @relation(fields: [userId], references: [id])
+  blog      Blog  @relation(fields: [blogId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("comments")
+}
+model ReviewProvider {
+  id         String   @id @default(uuid())
+  userId     String
+  providerId String
+  rating     Float
+  comment    String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  provider    Provider  @relation(fields: [providerId], references: [id])
+
+  @@map("reviewProvider")
+}
+
+model Offer {
+  id           String     @id @default(uuid())
+  offerName    String
+  startDate    DateTime
+  endDate      DateTime
+  discount     Int
+  status       offerStatus  @default(Active)
+  services     Service[]    @relation("ServiceOffer")
+  providerId   String
+  provider     Provider @relation(fields: [providerId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@map("offers")
 }
 
 model Faq {
@@ -129,42 +278,46 @@ model Faq {
   @@map("faqs")
 }
 
-model Blog {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  blogImg   String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("blogs")
-}
-
-model Feedback {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  name      String
-  email     String
-  feedback  String
-}
-
 enum Role {
-  super_admin
-  admin
-  user
+  User
+  Admin
+}
+
+enum ProviderRole {
+  Provider
+  Admin
+  
+}
+
+enum ServiceStatus {
+  Active
+  Inactive
+}
+
+enum ApprovalStatus {
+  Pending
+  Approved
+  Rejected
 }
 
 enum Status {
-  pending
-  confirmed
+  Pending
+  Confirmed
+  Rejected
 }
-
-enum Availbility {
-  upcoming
-  available
+enum offerStatus {
+  Active
+  Inactive
+  
 }
-
+enum WorkStatus {
+  Pending
+  InProgress
+  Completed
+  Canceled
+}
 enum PaymentStatus {
-  PANDING
-  PAID
+  Unpaid
+  Paid
+  Cancel
 }

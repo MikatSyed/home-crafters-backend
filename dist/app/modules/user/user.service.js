@@ -32,73 +32,15 @@ const config_1 = __importDefault(require("../../../config"));
 const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const cloudinary_1 = __importDefault(require("cloudinary"));
-const sendMail_1 = require("../../utils/sendMail");
-const promises_1 = __importDefault(require("fs/promises"));
-const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, email, password, role, contactNo, address } = data;
-    const isEmailExist = yield prisma_1.default.user.findFirst({
-        where: {
-            email,
-        },
-    });
-    if (isEmailExist) {
-        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Email already exits');
-    }
-    let { profileImg } = data;
-    let images = [];
-    if (typeof profileImg === 'string') {
-        images.push(profileImg);
-    }
-    else {
-        images = profileImg;
-    }
-    if (!profileImg) {
-        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Please Select Image');
-    }
-    const imagesLinks = [];
-    for (let i = 0; i < images.length; i++) {
-        const result = yield cloudinary_1.default.v2.uploader.upload(images[i], {
-            folder: 'auth',
-        });
-        imagesLinks.push({
-            public_id: result.public_id,
-            url: result.secure_url,
-        });
-    }
-    profileImg = imagesLinks.map(image => image.url);
-    const hashedPassword = yield bcrypt_1.default.hash(password, Number(config_1.default.bycrypt_salt_rounds));
-    const result = yield prisma_1.default.user.create({
-        data: {
-            name,
-            email,
-            password: hashedPassword,
-            role,
-            contactNo,
-            address,
-            profileImg,
-            createdAt: new Date(),
-        },
-    });
-    const subject = 'Welcome to Home Service - Your Login Details';
-    const from = process.env.Email;
-    const htmlContent = yield promises_1.default.readFile(__dirname + '/../../utils/welcome_email_template.html', 'utf8');
-    const replacedHtmlContent = htmlContent
-        .replace('{{ email }}', email)
-        .replace('{{ password }}', password);
-    if (result) {
-        (0, sendMail_1.sendEMail)(from, result.email, subject, replacedHtmlContent);
-    }
-    return result;
-});
 const getAllFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.user.findMany({
         select: {
             id: true,
-            name: true,
+            fName: true,
+            lName: true,
             email: true,
             role: true,
             contactNo: true,
-            address: true,
             profileImg: true,
             createdAt: true,
         },
@@ -112,11 +54,11 @@ const getByIdFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
         },
         select: {
             id: true,
-            name: true,
+            fName: true,
+            lName: true,
             email: true,
             role: true,
             contactNo: true,
-            address: true,
             profileImg: true,
             createdAt: true,
         },
@@ -181,11 +123,11 @@ const updateOneInDB = (id, payload) => __awaiter(void 0, void 0, void 0, functio
         data: Object.assign(Object.assign({}, userData), { profileImg: profileImg || isUserExist.profileImg }),
         select: {
             id: true,
-            name: true,
+            fName: true,
+            lName: true,
             email: true,
             role: true,
             contactNo: true,
-            address: true,
             profileImg: true,
             createdAt: true,
         },
@@ -193,23 +135,53 @@ const updateOneInDB = (id, payload) => __awaiter(void 0, void 0, void 0, functio
     return result;
 });
 const deleteByIdFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const isUserExist = yield prisma_1.default.user.findFirst({
-        where: {
-            id,
+    // Check if the user exists and select only necessary fields
+    const user = yield prisma_1.default.user.findUnique({
+        where: { id },
+        select: {
+            id: true,
+            fName: true,
+            lName: true,
+            email: true,
+            contactNo: true,
+            profileImg: true,
+            createdAt: true,
         },
     });
-    if (!isUserExist) {
+    if (!user) {
         throw new ApiError_1.default(http_status_1.default.NOT_FOUND, 'User does not exist');
     }
-    const result = yield prisma_1.default.user.delete({
-        where: {
-            id,
-        },
-    });
-    return result;
+    // Perform a transaction to delete the user and related entities
+    yield prisma_1.default.$transaction((prisma) => __awaiter(void 0, void 0, void 0, function* () {
+        // Delete the user's comments
+        yield prisma.comment.deleteMany({
+            where: {
+                userId: id,
+            },
+        });
+        // Delete the user's reviews
+        yield prisma.review.deleteMany({
+            where: {
+                userId: id,
+            },
+        });
+        // Delete the user's bookings
+        yield prisma.booking.deleteMany({
+            where: {
+                userId: id,
+            },
+        });
+        // Finally, delete the user
+        yield prisma.user.delete({
+            where: {
+                id,
+            },
+        });
+    }));
+    // Return the deleted user's data in IResponseUser format
+    return user;
 });
 exports.UserService = {
-    createUser,
     getAllFromDB,
     getByIdFromDB,
     updateOneInDB,

@@ -7,7 +7,18 @@ import pick from '../../../shared/pick';
 import sendResponse from '../../../shared/sendResponse';
 
 const initPayment = async (req: Request, res: Response) => {
-  const result = await PaymentService.initPayment(req.body);
+  const userId = req?.user?.userId;
+  const result = await PaymentService.initPayment(req.body,userId);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Payment init successfully',
+    data: result,
+  });
+};
+const initPaymentForCombo = async (req: Request, res: Response) => {
+  const userId = req?.user?.userId;
+  const result = await PaymentService.initPaymentForCombo(req.body,userId);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -19,23 +30,32 @@ const initPayment = async (req: Request, res: Response) => {
 const paymentVerify = async (req: Request, res: Response) => {
   const id = req.query;
   const { transectionId } = id;
-
+  
   const result = await PaymentService.paymentVerify(transectionId);
-  console.log(result, 'aaaaa');
-  // Check if the update was successful
+  console.log(result,'35')
   if (result && result.count > 0) {
-    // Send a success response
-    // sendResponse(res, {
-    //   success: true,
-    //   statusCode: httpStatus.OK,
-    //   message: 'Payment verified!',
-    //   data: result,
-    // });
-
-    // Redirect after sending the response
-    res.redirect(
-      `https://home-crafter.vercel.app/success?transactionId=${result?.transactionId}d}`
-    );
+  
+   
+    
+    res.redirect('https://home-crafter.vercel.app/booking-done');
+  } else {
+    // Handle the case where the update failed
+    sendResponse(res, {
+      success: false,
+      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Payment verification failed',
+    });
+  }
+};
+const paymentVerifyForCombo = async (req: Request, res: Response) => {
+  const id = req.query;
+  const { transectionId } = id;
+  
+  const result = await PaymentService.paymentVerifyForCombo(transectionId);
+  if (result && result.count > 0) {
+    const redirectUrl = 'https://home-crafter.vercel.app/combo-booking-done'
+   
+    res.redirect(redirectUrl);
   } else {
     // Handle the case where the update failed
     sendResponse(res, {
@@ -46,15 +66,7 @@ const paymentVerify = async (req: Request, res: Response) => {
   }
 };
 
-const webhook = async (req: Request, res: Response) => {
-  const result = await PaymentService.webhook(req.query);
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatus.OK,
-    message: 'Payment verified!',
-    data: result,
-  });
-};
+
 
 const getAllFromDB = async (
   req: Request,
@@ -62,15 +74,13 @@ const getAllFromDB = async (
   next: NextFunction
 ) => {
   try {
-    const filters = pick(req.query, paymentFilterableFields);
-    const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
-    const result = await PaymentService.getAllFromDB(filters, options);
+    const providerId = req?.provider?.providerId
+    const result = await PaymentService.getAllFromDB(providerId);
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
       message: 'Payments fetched successfully',
-      meta: result.meta,
-      data: result.data,
+      data: result
     });
   } catch (error) {
     next(error);
@@ -98,8 +108,9 @@ const deleteFromDB = async (
 
 export const PaymentController = {
   initPayment,
+  initPaymentForCombo,
   paymentVerify,
-  webhook,
+  paymentVerifyForCombo,
   getAllFromDB,
   deleteFromDB,
 };

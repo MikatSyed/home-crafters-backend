@@ -26,11 +26,24 @@ const insertIntoDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
     });
 }));
 const getAllFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield booking_service_1.BookingService.getAllFromDB();
+    var _a;
+    const providerId = (_a = req === null || req === void 0 ? void 0 : req.provider) === null || _a === void 0 ? void 0 : _a.providerId;
+    const result = yield booking_service_1.BookingService.getAllFromDB(providerId);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
         message: 'Booking fetched successfully',
+        data: result,
+    });
+}));
+const getAllFromDBForUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    const userId = (_b = req === null || req === void 0 ? void 0 : req.user) === null || _b === void 0 ? void 0 : _b.userId;
+    const result = yield booking_service_1.BookingService.getAllFromDBForUser(userId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'User Booking fetched successfully',
         data: result,
     });
 }));
@@ -87,6 +100,7 @@ const getStatistics = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
 exports.BookingController = {
     insertIntoDB,
     getAllFromDB,
+    getAllFromDBForUser,
     getByIdFromDB,
     updateOneInDB,
     deleteByIdFromDB,

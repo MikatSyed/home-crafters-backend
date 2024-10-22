@@ -4,12 +4,14 @@ exports.ServiceRelationalFieldsMapper = exports.ServiceRelationalFields = export
 exports.ServiceFilterableFields = [
     'searchTerm',
     'category',
+    'location',
+    'rating',
     'minPrice',
     'maxPrice',
 ];
 exports.queryFields = ['limit', 'page', 'sortBy', 'sortOrder'];
-exports.ServiceSearchableFields = ['name', 'location'];
-exports.ServiceRelationalFields = ['category', 'name'];
+exports.ServiceSearchableFields = ['serviceName', 'location'];
+exports.ServiceRelationalFields = ['category', 'categoryName'];
 exports.ServiceRelationalFieldsMapper = {
     category: 'category',
 };

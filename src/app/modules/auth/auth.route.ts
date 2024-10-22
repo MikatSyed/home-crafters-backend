@@ -9,13 +9,23 @@ const router = express.Router();
 
 router.post(
   '/signup',
-  validateRequest(AuthValidation.signupZodSchema),
+  // validateRequest(AuthValidation.signupZodSchema),
   AuthController.createUser
+);
+router.post(
+  '/provider/signup',
+  // validateRequest(AuthValidation.signupZodSchema),
+  AuthController.ProviderSignup
 );
 router.post(
   '/login',
   // validateRequest(AuthValidation.loginZodSchema),
   AuthController.loginUser
+);
+router.post(
+  '/provider/login',
+  // validateRequest(AuthValidation.loginZodSchema),
+  AuthController.loginProvider
 );
 
 router.post(
@@ -26,9 +36,17 @@ router.post(
 
 router.patch(
   '/change-password/:id',
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.USER),
+  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.PROVIDER, ENUM_USER_ROLE.USER),
   validateRequest(AuthValidation.changePasswordZodSchema),
   AuthController.changePassword
+);
+router.post(
+  '/forgot-password',
+  AuthController.forgotPassword
+);
+router.post(
+  '/reset-password',
+  AuthController.resetPassword
 );
 
 export const AuthRoutes = router;

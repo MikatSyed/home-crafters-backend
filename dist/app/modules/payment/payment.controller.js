@@ -15,11 +15,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentController = void 0;
 const payment_service_1 = require("./payment.service");
 const http_status_1 = __importDefault(require("http-status"));
-const payment_constants_1 = require("./payment.constants");
-const pick_1 = __importDefault(require("../../../shared/pick"));
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const initPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield payment_service_1.PaymentService.initPayment(req.body);
+    var _a;
+    const userId = (_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.userId;
+    const result = yield payment_service_1.PaymentService.initPayment(req.body, userId);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_1.default.OK,
+        message: 'Payment init successfully',
+        data: result,
+    });
+});
+const initPaymentForCombo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    const userId = (_b = req === null || req === void 0 ? void 0 : req.user) === null || _b === void 0 ? void 0 : _b.userId;
+    const result = yield payment_service_1.PaymentService.initPaymentForCombo(req.body, userId);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_1.default.OK,
@@ -29,20 +40,11 @@ const initPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 const paymentVerify = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.query;
-    let { transectionId } = id;
+    const { transectionId } = id;
     const result = yield payment_service_1.PaymentService.paymentVerify(transectionId);
-    console.log(result, 'aaaaa');
-    // Check if the update was successful
+    console.log(result, '35');
     if (result && result.count > 0) {
-        // Send a success response
-        // sendResponse(res, {
-        //   success: true,
-        //   statusCode: httpStatus.OK,
-        //   message: 'Payment verified!',
-        //   data: result,
-        // });
-        // Redirect after sending the response
-        res.redirect(`https://home-crafter.vercel.app/success?transactionId=${result === null || result === void 0 ? void 0 : result.transactionId}d}`);
+        res.redirect('https://home-crafter.vercel.app/booking-done');
     }
     else {
         // Handle the case where the update failed
@@ -53,26 +55,33 @@ const paymentVerify = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         });
     }
 });
-const webhook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield payment_service_1.PaymentService.webhook(req.query);
-    (0, sendResponse_1.default)(res, {
-        success: true,
-        statusCode: http_status_1.default.OK,
-        message: 'Payment verified!',
-        data: result,
-    });
+const paymentVerifyForCombo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.query;
+    const { transectionId } = id;
+    const result = yield payment_service_1.PaymentService.paymentVerifyForCombo(transectionId);
+    if (result && result.count > 0) {
+        const redirectUrl = 'https://home-crafter.vercel.app/combo-booking-done';
+        res.redirect(redirectUrl);
+    }
+    else {
+        // Handle the case where the update failed
+        (0, sendResponse_1.default)(res, {
+            success: false,
+            statusCode: http_status_1.default.INTERNAL_SERVER_ERROR,
+            message: 'Payment verification failed',
+        });
+    }
 });
 const getAllFromDB = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c;
     try {
-        const filters = (0, pick_1.default)(req.query, payment_constants_1.paymentFilterableFields);
-        const options = (0, pick_1.default)(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
-        const result = yield payment_service_1.PaymentService.getAllFromDB(filters, options);
+        const providerId = (_c = req === null || req === void 0 ? void 0 : req.provider) === null || _c === void 0 ? void 0 : _c.providerId;
+        const result = yield payment_service_1.PaymentService.getAllFromDB(providerId);
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.OK,
             success: true,
             message: 'Payments fetched successfully',
-            meta: result.meta,
-            data: result.data,
+            data: result
         });
     }
     catch (error) {
@@ -96,8 +105,9 @@ const deleteFromDB = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.PaymentController = {
     initPayment,
+    initPaymentForCombo,
     paymentVerify,
-    webhook,
+    paymentVerifyForCombo,
     getAllFromDB,
     deleteFromDB,
 };

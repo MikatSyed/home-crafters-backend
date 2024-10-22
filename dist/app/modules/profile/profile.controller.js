@@ -16,17 +16,19 @@ exports.ProfileController = void 0;
 const profile_service_1 = require("./profile.service");
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
-const getUserProfile = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const userId = (_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.userId;
-    const result = yield profile_service_1.ProfileService.getUserProfile(userId);
+const getProfile = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
+    const providerId = (_a = req === null || req === void 0 ? void 0 : req.provider) === null || _a === void 0 ? void 0 : _a.providerId;
+    const userId = (_b = req === null || req === void 0 ? void 0 : req.user) === null || _b === void 0 ? void 0 : _b.userId;
+    console.log(req === null || req === void 0 ? void 0 : req.user, '10');
+    const result = yield profile_service_1.ProfileService.getProfile(providerId, userId);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: 'User fetched successfully',
+        message: 'Profile fetched successfully',
         data: result,
     });
 }));
 exports.ProfileController = {
-    getUserProfile,
+    getProfile
 };

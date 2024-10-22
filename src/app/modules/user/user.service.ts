@@ -12,88 +12,17 @@ import cloudinary from 'cloudinary';
 import { sendEMail } from '../../utils/sendMail';
 import fs from 'fs/promises';
 
-const createUser = async (data: User): Promise<Partial<User>> => {
-  const { name, email, password, role, contactNo, address } = data;
 
-  const isEmailExist = await prisma.user.findFirst({
-    where: {
-      email,
-    },
-  });
-
-  if (isEmailExist) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already exits');
-  }
-
-  let { profileImg } = data;
-  let images: any = [];
-
-  if (typeof profileImg === 'string') {
-    images.push(profileImg);
-  } else {
-    images = profileImg;
-  }
-  if (!profileImg) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Please Select Image');
-  }
-
-  const imagesLinks = [];
-
-  for (let i = 0; i < images.length; i++) {
-    const result = await cloudinary.v2.uploader.upload(images[i], {
-      folder: 'auth',
-    });
-
-    imagesLinks.push({
-      public_id: result.public_id,
-      url: result.secure_url,
-    });
-  }
-  profileImg = imagesLinks.map(image => image.url);
-
-  const hashedPassword = await bcrypt.hash(
-    password,
-    Number(config.bycrypt_salt_rounds)
-  );
-  const result = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-      role,
-      contactNo,
-      address,
-      profileImg,
-      createdAt: new Date(),
-    },
-  });
-
-  const subject = 'Welcome to Home Service - Your Login Details';
-  const from = process.env.Email;
-  const htmlContent = await fs.readFile(
-    __dirname + '/../../utils/welcome_email_template.html',
-    'utf8'
-  );
-
-  const replacedHtmlContent = htmlContent
-    .replace('{{ email }}', email)
-    .replace('{{ password }}', password);
-
-  if (result) {
-    sendEMail(from, result.email, subject, replacedHtmlContent);
-  }
-  return result;
-};
 
 const getAllFromDB = async (): Promise<Partial<IResponseUser[]>> => {
   const result = await prisma.user.findMany({
     select: {
       id: true,
-      name: true,
+      fName: true,
+      lName: true,
       email: true,
       role: true,
       contactNo: true,
-      address: true,
       profileImg: true,
       createdAt: true,
     },
@@ -108,11 +37,11 @@ const getByIdFromDB = async (id: string): Promise<IResponseUser | null> => {
     },
     select: {
       id: true,
-      name: true,
+      fName: true,
+      lName: true,
       email: true,
       role: true,
       contactNo: true,
-      address: true,
       profileImg: true,
       createdAt: true,
     },
@@ -197,11 +126,11 @@ const updateOneInDB = async (
     },
     select: {
       id: true,
-      name: true,
+      fName: true,
+      lName: true,
       email: true,
       role: true,
       contactNo: true,
-      address: true,
       profileImg: true,
       createdAt: true,
     },
@@ -211,26 +140,61 @@ const updateOneInDB = async (
 };
 
 const deleteByIdFromDB = async (id: string): Promise<IResponseUser> => {
-  const isUserExist = await prisma.user.findFirst({
-    where: {
-      id,
+  // Check if the user exists and select only necessary fields
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      fName: true,
+      lName: true,
+      email: true,
+      contactNo: true,
+      profileImg: true,
+      createdAt: true,
     },
   });
 
-  if (!isUserExist) {
+  if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
   }
-  const result = await prisma.user.delete({
-    where: {
-      id,
-    },
+
+  // Perform a transaction to delete the user and related entities
+  await prisma.$transaction(async (prisma) => {
+    // Delete the user's comments
+    await prisma.comment.deleteMany({
+      where: {
+        userId: id,
+      },
+    });
+
+    // Delete the user's reviews
+    await prisma.review.deleteMany({
+      where: {
+        userId: id,
+      },
+    });
+
+    // Delete the user's bookings
+    await prisma.booking.deleteMany({
+      where: {
+        userId: id,
+      },
+    });
+
+    // Finally, delete the user
+    await prisma.user.delete({
+      where: {
+        id,
+      },
+    });
   });
 
-  return result;
+  // Return the deleted user's data in IResponseUser format
+  return user;
 };
 
 export const UserService = {
-  createUser,
+
   getAllFromDB,
   getByIdFromDB,
   updateOneInDB,

@@ -12,8 +12,8 @@ const validateRequest_1 = __importDefault(require("../../middlewares/validateReq
 const user_validate_1 = require("./user.validate");
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 const router = express_1.default.Router();
-router.get('/', (0, auth_1.default)(user_1.ENUM_USER_ROLE.SUPER_ADMIN, user_1.ENUM_USER_ROLE.ADMIN), user_controller_1.UserController.getAllUsers);
-router.get('/:id', (0, auth_1.default)(user_1.ENUM_USER_ROLE.USER, user_1.ENUM_USER_ROLE.SUPER_ADMIN, user_1.ENUM_USER_ROLE.ADMIN), user_controller_1.UserController.getByIdFromDB);
-router.patch('/:id', (0, validateRequest_1.default)(user_validate_1.UserValidation.userUpdateZodSchema), (0, auth_1.default)(user_1.ENUM_USER_ROLE.USER, user_1.ENUM_USER_ROLE.SUPER_ADMIN, user_1.ENUM_USER_ROLE.ADMIN), user_controller_1.UserController.updateOneInDB);
-router.delete('/:id', (0, auth_1.default)(user_1.ENUM_USER_ROLE.SUPER_ADMIN, user_1.ENUM_USER_ROLE.ADMIN), user_controller_1.UserController.deleteByIdFromDB);
+router.get('/', (0, auth_1.default)(user_1.ENUM_USER_ROLE.ADMIN), user_controller_1.UserController.getAllUsers);
+router.get('/:id', (0, auth_1.default)(user_1.ENUM_USER_ROLE.USER, user_1.ENUM_USER_ROLE.PROVIDER, user_1.ENUM_USER_ROLE.ADMIN), user_controller_1.UserController.getByIdFromDB);
+router.patch('/:id', (0, validateRequest_1.default)(user_validate_1.UserValidation.userUpdateZodSchema), (0, auth_1.default)(user_1.ENUM_USER_ROLE.USER), user_controller_1.UserController.updateOneInDB);
+router.delete('/:id', (0, auth_1.default)(user_1.ENUM_USER_ROLE.PROVIDER, user_1.ENUM_USER_ROLE.ADMIN), user_controller_1.UserController.deleteByIdFromDB);
 exports.UserRoutes = router;

@@ -4,7 +4,7 @@ exports.CategoryValidation = void 0;
 const zod_1 = require("zod");
 const createCategoryZodSchema = zod_1.z.object({
     body: zod_1.z.object({
-        title: zod_1.z.string({
+        categoryName: zod_1.z.string({
             required_error: 'Title is required',
         }),
         categoryImg: zod_1.z.string({
@@ -14,8 +14,8 @@ const createCategoryZodSchema = zod_1.z.object({
 });
 const updateCategoryZodSchema = zod_1.z.object({
     body: zod_1.z.object({
-        title: zod_1.z.string({
-            required_error: 'Title is required',
+        categoryName: zod_1.z.string({
+            required_error: 'categoryName is required',
         }),
     }),
 });

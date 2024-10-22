@@ -13,22 +13,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BookingService = void 0;
+const client_1 = require("@prisma/client");
 const http_status_1 = __importDefault(require("http-status"));
 const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
 const insertIntoDB = (data) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(data);
-    const { userId, serviceId, slotId, bookingDate } = data;
-    // Create the booking if it doesn't already exist
+    const { userId, serviceId, day, time, bookingDate } = data;
     const existingBooking = yield prisma_1.default.booking.findFirst({
         where: {
-            slotId,
+            Day: day,
+            Time: time,
             serviceId,
-            bookingDate,
+            bookingDate
         },
     });
     if (existingBooking) {
-        // The slot is already booked for this date and service
         throw new Error('Slot is not available for this date and service.');
     }
     const result = yield prisma_1.default.booking.create({
@@ -36,76 +36,155 @@ const insertIntoDB = (data) => __awaiter(void 0, void 0, void 0, function* () {
             bookingDate,
             userId,
             serviceId,
-            slotId,
-            // Other fields...
+            Day: day,
+            Time: time,
         },
     });
     return result;
 });
 const fetchBookingsForDate = (bookingDate) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('s', bookingDate);
     if (bookingDate) {
         const bookings = yield prisma_1.default.booking.findMany({
             where: {
                 bookingDate,
             },
+            select: {
+                bookingDate: true,
+                Day: true,
+                Time: true,
+            },
         });
         console.log(bookings);
         return bookings;
     }
+    return null;
 });
-const getAllFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.booking.findMany({
+const getAllFromDB = (providerId) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = {
         include: {
             user: true,
             service: true,
-            slot: true, // Include the TimeSlots relation
-            // Include the Payment relation
         },
         orderBy: {
             createdAt: 'desc',
         },
-    });
+    };
+    if (providerId) {
+        // Fetch user details to determine if the user is an admin
+        const provider = yield prisma_1.default.provider.findUnique({
+            where: { id: providerId },
+        });
+        if (!provider) {
+            throw new Error("User not found");
+        }
+        const isAdmin = provider.role === client_1.ProviderRole.Admin;
+        if (!isAdmin && providerId) {
+            // If the user is not an admin and providerId is defined, filter by providerId
+            query.where = {
+                service: {
+                    providerId: providerId,
+                },
+            };
+        }
+    }
+    else if (providerId) {
+        // If userId is not defined but providerId is, filter by providerId
+        query.where = {
+            service: {
+                providerId: providerId,
+            },
+        };
+    }
+    // Fetch the bookings from the database
+    const result = yield prisma_1.default.booking.findMany(query);
+    return result;
+});
+const getAllFromDBForUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = {
+        include: {
+            service: {
+                include: {
+                    provider: {
+                        select: {
+                            fName: true,
+                            lName: true,
+                            profileImg: true,
+                            email: true,
+                            category: true
+                        },
+                    },
+                },
+            },
+        },
+        orderBy: {
+            createdAt: 'desc',
+        },
+    };
+    if (userId) {
+        query.where = {
+            userId: userId,
+        };
+    }
+    const result = yield prisma_1.default.booking.findMany(query);
     return result;
 });
 const getByIdFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const isBookingExist = yield prisma_1.default.booking.findFirst({
-        where: {
-            id,
-        },
+        where: { id },
     });
     if (!isBookingExist) {
         throw new ApiError_1.default(http_status_1.default.NOT_FOUND, 'Booking does not exist');
     }
     const result = yield prisma_1.default.booking.findUnique({
-        where: {
-            id,
-        },
+        where: { id },
         include: {
             user: true,
-            service: true,
-            slot: true, // Include the TimeSlots relation
-            // Include the Payment relation
+            service: {
+                include: {
+                    category: true, // Include the Category relation within Service
+                },
+            },
+            // Include the Payment relation if needed
         },
     });
     return result;
 });
 const updateOneInDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isBookingExist = yield prisma_1.default.booking.findFirst({
+    const existingBooking = yield prisma_1.default.booking.findFirst({
         where: {
             id,
         },
     });
-    if (!isBookingExist) {
+    if (!existingBooking) {
         throw new ApiError_1.default(http_status_1.default.NOT_FOUND, 'Booking does not exist');
     }
-    const result = yield prisma_1.default.booking.update({
+    // Prevent status from being downgraded from Confirmed to Pending
+    if (existingBooking.status === client_1.Status.Confirmed &&
+        payload.status === client_1.Status.Pending) {
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Cannot change status from Confirmed to Pending');
+    }
+    // Prevent workStatus from being downgraded from InProgress to Pending
+    if (existingBooking.workStatus === client_1.WorkStatus.InProgress &&
+        payload.workStatus === client_1.WorkStatus.Pending) {
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Cannot change work status from In Progress to Pending');
+    }
+    // Only automatically update workStatus if it's not provided in the payload
+    if (!payload.workStatus) {
+        if (payload.status === client_1.Status.Confirmed) {
+            payload.workStatus = client_1.WorkStatus.InProgress;
+        }
+        else if (payload.status === client_1.Status.Rejected) {
+            payload.workStatus = client_1.WorkStatus.Canceled;
+        }
+    }
+    // Update the booking with the new data
+    const updatedBooking = yield prisma_1.default.booking.update({
         where: {
             id,
         },
-        data: payload,
+        data: Object.assign(Object.assign({}, payload), { workStatus: payload.workStatus === client_1.WorkStatus.InProgress ? client_1.WorkStatus.InProgress : payload.workStatus }),
     });
-    return result;
+    return updatedBooking;
 });
 // const deleteByIdFromDB = async (id: string): Promise<Booking> => {
 //   const isBookingExist = await prisma.booking.findFirst({
@@ -159,6 +238,7 @@ const getStatistics = () => __awaiter(void 0, void 0, void 0, function* () {
 exports.BookingService = {
     insertIntoDB,
     getAllFromDB,
+    getAllFromDBForUser,
     getByIdFromDB,
     updateOneInDB,
     deleteByIdFromDB,

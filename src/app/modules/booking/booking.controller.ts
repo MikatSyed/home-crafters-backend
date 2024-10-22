@@ -15,12 +15,26 @@ const insertIntoDB: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getAllFromDB: RequestHandler = catchAsync(async (req, res) => {
-  const result = await BookingService.getAllFromDB();
+  const providerId = req?.provider?.providerId
+ 
+  const result = await BookingService.getAllFromDB(providerId);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Booking fetched successfully',
+    data: result,
+  });
+});
+const getAllFromDBForUser: RequestHandler = catchAsync(async (req, res) => {
+  const userId = req?.user?.userId
+ 
+  const result = await BookingService.getAllFromDBForUser(userId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User Booking fetched successfully',
     data: result,
   });
 });
@@ -88,6 +102,7 @@ const getStatistics: RequestHandler = catchAsync(async (req, res) => {
 export const BookingController = {
   insertIntoDB,
   getAllFromDB,
+  getAllFromDBForUser,
   getByIdFromDB,
   updateOneInDB,
   deleteByIdFromDB,

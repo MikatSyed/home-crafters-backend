@@ -17,7 +17,9 @@ const catchAsync_1 = __importDefault(require("../../../shared/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const blog_service_1 = require("./blog.service");
 const insertIntoDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield blog_service_1.BlogService.insertIntoDB(req.body);
+    var _a;
+    const providerId = (_a = req === null || req === void 0 ? void 0 : req.provider) === null || _a === void 0 ? void 0 : _a.providerId;
+    const result = yield blog_service_1.BlogService.insertIntoDB(req.body, providerId);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
@@ -26,11 +28,46 @@ const insertIntoDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
     });
 }));
 const getAllFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield blog_service_1.BlogService.getAllFromDB();
+    const { categoryId, month, year } = req.query;
+    const parsedMonth = month ? parseInt(month, 10) : undefined;
+    const parsedYear = year ? parseInt(year, 10) : undefined;
+    const result = yield blog_service_1.BlogService.getAllFromDB(categoryId, parsedMonth, parsedYear);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
         message: 'Blogs fetched successfully',
+        data: result,
+    });
+}));
+const getAllProviderBlogFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    const providerId = (_b = req === null || req === void 0 ? void 0 : req.provider) === null || _b === void 0 ? void 0 : _b.providerId;
+    const result = yield blog_service_1.BlogService.getAllProviderBlogFromDB(providerId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Blogs fetched successfully',
+        data: result,
+    });
+}));
+const getLatestTenFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const blogId = req.query.blogId;
+    const result = yield blog_service_1.BlogService.getLatestTenFromDB(blogId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Latest Blogs fetched successfully',
+        data: result,
+    });
+}));
+const getBlogsByCategoryFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const categoryId = req.query.categoryId;
+    const blogId = req.query.blogId;
+    const result = yield blog_service_1.BlogService.getBlogsByCategoryFromDB(categoryId, blogId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Similar Blogs fetched successfully',
         data: result,
     });
 }));
@@ -67,6 +104,9 @@ const deleteByIdFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 
 exports.BlogController = {
     insertIntoDB,
     getAllFromDB,
+    getAllProviderBlogFromDB,
+    getLatestTenFromDB,
+    getBlogsByCategoryFromDB,
     getByIdFromDB,
     updateOneInDB,
     deleteByIdFromDB,

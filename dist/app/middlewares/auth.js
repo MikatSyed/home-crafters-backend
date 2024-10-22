@@ -18,16 +18,21 @@ const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const jwtHelpers_1 = require("../../helpers/jwtHelpers");
 const auth = (...requiredRoles) => (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        //get authorization token
+        // Get authorization token
         const token = req.headers.authorization;
         if (!token) {
             throw new ApiError_1.default(http_status_1.default.UNAUTHORIZED, 'You are not authorized');
         }
-        // verify token
-        let verifiedUser = null;
-        verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
-        req.user = verifiedUser; // role  , userid
-        // role diye guard korar jnno
+        // Verify token
+        const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
+        // Check user role and set req.user or req.provider
+        if (verifiedUser.role === 'Provider' || verifiedUser.role === 'Admin') {
+            req.provider = verifiedUser;
+        }
+        else if (verifiedUser.role === 'User') {
+            req.user = verifiedUser;
+        }
+        // Role-based authorization guard
         if (requiredRoles.length && !requiredRoles.includes(verifiedUser.role)) {
             throw new ApiError_1.default(http_status_1.default.FORBIDDEN, 'Forbidden');
         }

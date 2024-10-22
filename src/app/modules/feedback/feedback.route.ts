@@ -1,8 +1,8 @@
-import express from 'express';
-import { FeedbackController } from './feedback.controller';
+// import express from 'express';
+// import { FeedbackController } from './feedback.controller';
 
-const router = express.Router();
+// const router = express.Router();
 
-router.post('/', FeedbackController.createFeedBack);
+// router.post('/', FeedbackController.createFeedBack);
 
-export const FeedbackRoutes = router;
+// export const FeedbackRoutes = router;

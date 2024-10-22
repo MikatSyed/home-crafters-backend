@@ -5,6 +5,8 @@ export type IGenericResponse<T> = {
     page: number;
     limit: number;
     total: number;
+    ratingCounts?:any;
+
   };
   data: T;
 };

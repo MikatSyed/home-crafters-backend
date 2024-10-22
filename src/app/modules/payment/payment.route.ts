@@ -6,16 +6,18 @@ import { ENUM_USER_ROLE } from '../../../enums/user';
 const router = express.Router();
 
 router.post('/success', PaymentController.paymentVerify);
+router.post('/success/combo', PaymentController.paymentVerifyForCombo);
 router.post('/init', PaymentController.initPayment);
+router.post('/init/combo', PaymentController.initPaymentForCombo);
 
 router.get(
   '/',
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.PROVIDER),
   PaymentController.getAllFromDB
 );
 router.get(
   '/:id',
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.PROVIDER),
   PaymentController.deleteFromDB
 );
 router.delete(
@@ -24,6 +26,6 @@ router.delete(
   PaymentController.deleteFromDB
 );
 
-router.post('/webhook', PaymentController.webhook);
 
-export const paymentRoutes = router;
+
+export const PaymentRoutes = router;

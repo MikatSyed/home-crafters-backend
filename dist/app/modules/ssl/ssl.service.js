@@ -17,17 +17,20 @@ const http_status_1 = __importDefault(require("http-status"));
 const axios_1 = __importDefault(require("axios"));
 const config_1 = __importDefault(require("../../../config"));
 const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
+/**
+ * Initialize payment for standard payments.
+ */
 const initPayment = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = {
             store_id: config_1.default.ssl.storeId,
             store_passwd: config_1.default.ssl.storePass,
             total_amount: payload.total_amount,
-            currency: 'BDT',
+            currency: 'USD',
             tran_id: payload.tran_id,
-            success_url: `https://home-crafters-mikatsyed.vercel.app/api/v1/payment/success?transectionId=${payload.tran_id}`,
-            fail_url: `https://home-crafter-mikatsyed.vercel.app/fail?transectionId=${payload.tran_id}`,
-            cancel_url: `https://home-crafter-mikatsyed.vercel.app/cancel`,
+            success_url: 'https://home-crafter-backend.vercel.app/api/v1/payment/success',
+            fail_url: 'https://home-crafter-backend.vercel.app/fail',
+            cancel_url: 'https://home-crafter-backend.vercel.app/cancel',
             ipn_url: 'http://localhost:3030/ipn',
             shipping_method: 'N/A',
             product_name: 'Service Payment',
@@ -36,10 +39,10 @@ const initPayment = (payload) => __awaiter(void 0, void 0, void 0, function* () 
             cus_name: payload.cus_name,
             cus_email: payload.cus_email,
             cus_add1: payload.cus_add1,
-            cus_city: 'Dhaka',
-            cus_state: 'Dhaka',
-            cus_postcode: '1000',
-            cus_country: 'Bangladesh',
+            cus_city: payload.cus_city,
+            cus_state: payload.cus_state,
+            cus_postcode: payload.zipCode,
+            cus_country: payload.cus_country,
             cus_phone: payload.cus_phone,
             cus_fax: '01711111111',
             ship_name: 'Customer Name',
@@ -56,27 +59,77 @@ const initPayment = (payload) => __awaiter(void 0, void 0, void 0, function* () 
             data: data,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         });
-        console.log(response);
         return response.data;
     }
     catch (err) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Payment error');
     }
 });
+/**
+ * Initialize payment for combo packages.
+ */
+const initPaymentForCombo = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const data = {
+            store_id: config_1.default.ssl.storeId,
+            store_passwd: config_1.default.ssl.storePass,
+            total_amount: payload.total_amount,
+            currency: 'USD',
+            tran_id: payload.tran_id,
+            success_url: 'https://home-crafter-backend.vercel.app/api/v1/payment/success/combo',
+            fail_url: 'https://home-crafter-backend.vercel.app/fail',
+            cancel_url: 'https://home-crafter-backend.vercel.app/cancel',
+            ipn_url: 'http://localhost:3030/ipn',
+            shipping_method: 'N/A',
+            product_name: 'Service Payment',
+            product_category: 'Payment',
+            product_profile: 'User',
+            cus_name: payload.cus_name,
+            cus_email: payload.cus_email,
+            cus_add1: payload.cus_add1,
+            cus_city: payload.cus_city,
+            cus_state: payload.cus_state,
+            cus_postcode: payload.zipCode,
+            cus_country: payload.cus_country,
+            cus_phone: payload.cus_phone,
+            cus_fax: '01711111111',
+            ship_name: 'Customer Name',
+            ship_add1: 'Dhaka',
+            ship_add2: 'Dhaka',
+            ship_city: 'Dhaka',
+            ship_state: 'Dhaka',
+            ship_postcode: 1000,
+            ship_country: 'Bangladesh',
+        };
+        const response = yield (0, axios_1.default)({
+            method: 'post',
+            url: config_1.default.ssl.sslPaymentUrl,
+            data: data,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        });
+        return response.data;
+    }
+    catch (err) {
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Payment error');
+    }
+});
+/**
+ * Validate the payment.
+ */
 const validate = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const response = yield (0, axios_1.default)({
             method: 'GET',
             url: `${config_1.default.ssl.sslValidationUrl}?val_id=${data.val_id}&store_id=${config_1.default.ssl.storeId}&store_passwd=${config_1.default.ssl.storePass}&format=json`,
         });
-        console.log(response);
         return response.data;
     }
     catch (err) {
-        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Payment error');
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Payment validation error');
     }
 });
 exports.sslService = {
     initPayment,
+    initPaymentForCombo,
     validate,
 };

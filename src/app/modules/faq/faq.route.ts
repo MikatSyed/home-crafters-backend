@@ -10,7 +10,7 @@ const router = express.Router();
 router.post(
   '/',
   validateRequest(FaqValidation.createFaqZodSchema),
-  auth(ENUM_USER_ROLE.ADMIN),
+  auth(ENUM_USER_ROLE.ADMIN,ENUM_USER_ROLE.PROVIDER),
   FaqController.insertIntoDB
 );
 
@@ -20,12 +20,12 @@ router.get('/:id', FaqController.getByIdFromDB);
 router.patch(
   '/:id',
   validateRequest(FaqValidation.updateFaqZodSchema),
-  auth(ENUM_USER_ROLE.ADMIN),
+  auth(ENUM_USER_ROLE.ADMIN,ENUM_USER_ROLE.PROVIDER),
   FaqController.updateOneInDB
 );
 router.delete(
   '/:id',
-  auth(ENUM_USER_ROLE.ADMIN),
+  auth(ENUM_USER_ROLE.ADMIN,ENUM_USER_ROLE.PROVIDER),
   FaqController.deleteByIdFromDB
 );
 

@@ -38,16 +38,25 @@ const getAllFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
         data: result.data,
     });
 }));
-const getByIdFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const result = yield category_service_1.CategoryService.getByIdFromDB(id);
+const getAllNameFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield category_service_1.CategoryService.getAllNameFromDB();
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: 'Category fetched successfully',
-        data: result,
+        message: 'Categories fetched successfully',
+        data: result
     });
 }));
+// const getByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+//   const result = await CategoryService.getByIdFromDB(id);
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Category fetched successfully',
+//     data: result,
+//   });
+// });
 const updateOneInDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const result = yield category_service_1.CategoryService.updateOneInDB(id, req.body);
@@ -71,7 +80,8 @@ const deleteByIdFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 
 exports.CategoryController = {
     insertIntoDB,
     getAllFromDB,
-    getByIdFromDB,
+    getAllNameFromDB,
+    // getByIdFromDB,
     updateOneInDB,
     deleteByIdFromDB,
 };

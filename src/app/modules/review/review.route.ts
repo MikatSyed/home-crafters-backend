@@ -8,14 +8,31 @@ const router = express.Router();
 router.post(
   '/',
   validateRequest(ReviewValidation.reviewZodSchema),
-  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  auth(ENUM_USER_ROLE.USER),
   ReviewController.postReview
+);
+router.post(
+  '/provider',
+  // validateRequest(ReviewValidation.reviewZodSchema),
+  auth(ENUM_USER_ROLE.USER),
+  ReviewController.postProviderReview
+);
+router.get(
+  '/',
+
+  ReviewController.getAllReview
 );
 router.get(
   '/:id',
-  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.PROVIDER),
   ReviewController.getReviewByServiceId
 );
+router.get(
+  '/provider/:id',
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.PROVIDER),
+  ReviewController.getReviewByProviderId
+);
 router.get('/', ReviewController.getAllReview);
+router.delete('/:id',auth(ENUM_USER_ROLE.ADMIN), ReviewController.deleteReviewFromDB);
 
 export const ReviewRoutes = router;
